@@ -25,16 +25,16 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
         HandlerMethod handlerMethod = (HandlerMethod) object;
         Method method = handlerMethod.getMethod();
+        String methodName = method.getName();
         // 检查方法名是否是“login”如果是则跳过，也可以加注解，用注解过滤不需要权限的方法
-        if ("login".equals(method.getName())) {
+        if ("login".equals(methodName) || "register".equals(methodName)) {
             return true;
         }
-        System.out.println("~~~~~~~~~~~~~method.name:" + method.getName());
         // 执行认证
         if (token == null) {
             // 不带token的话会出错，控制台报错
             // 但是问题不大，不用理会它
-            throw new RuntimeException("无token，请重新登录：" + method.getName());
+            throw new RuntimeException("无token，请重新登录：" + methodName);
         }
         // 获取 token 中的 name
         String name;

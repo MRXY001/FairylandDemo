@@ -1,12 +1,12 @@
 package com.iwxyi.fairyland.Models;
 
 import java.sql.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Transient;
+import javax.validation.constraints.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 import lombok.Data;
@@ -18,11 +18,12 @@ import lombok.NoArgsConstructor;
 public class User {
     @Id // 主键
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 表示主键由数据库生成，自增
-    // @Column(name = "user_id") // 实体属性名与数据库字段名不一致时
     private Long userId;
+    @Size(min = 2, max = 16, message = "用户名长度必须在{min}~{max}之间")
     private String username;
     private String passwordHash;
 
+    @Size(min = 2, max = 16, message = "昵称长度必须在{min}~{max}之间")
     private String nickname;
     private String phoneNumber;
     private int age;
@@ -35,7 +36,7 @@ public class User {
     private String mail;
     private String mooto;
     private String homePage;
-    
+
     private int level;
     private int integral;
     private int allWords;
@@ -44,11 +45,11 @@ public class User {
     private int allWordsYesterday;
     private int wordsYesterday;
     private int writeSpeed; // 每小时多少字
-    
+
     @Transient // 不存到数据库里
     private boolean vip; // 是否是VIP
     private double totalPay; // 总共付了多少钱（实付）
-    
+
     private int loginFailed;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
