@@ -1,6 +1,8 @@
 package com.iwxyi.fairyland.Controllers;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -9,10 +11,8 @@ import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -63,5 +63,17 @@ public class UserController {
     @RequestMapping("/testToken")
     public String testToken() {
         return "通过验证";
+    }
+    
+    @RequestMapping("/test")
+    public Map<String, Object> test() {
+        if (true) {
+            throw new RuntimeException("尝试异常成功");
+        }
+        // return "验证错误成功";
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("code", 250);
+        map.put("msg", "这是错误内容");
+        return map;
     }
 }

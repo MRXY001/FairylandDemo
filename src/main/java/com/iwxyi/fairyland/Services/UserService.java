@@ -20,7 +20,7 @@ public class UserService {
      */
     public User register(String username, String password, String phoneNumber) {
         if (username == null || password == null || phoneNumber == null) {
-            throw new NullPointerException("数据不能为空");
+            throw new RuntimeException("数据不能为空");
         }
         if (userRepository.findByUsername(username) != null) {
             throw new RuntimeException("用户名已存在");
