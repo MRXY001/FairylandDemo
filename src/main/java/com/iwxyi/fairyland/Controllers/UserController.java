@@ -1,5 +1,11 @@
 package com.iwxyi.fairyland.Controllers;
 
+import java.util.Date;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.iwxyi.fairyland.Constant.ConstantKey;
+import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +21,18 @@ public class UserController {
     UserService userService;
     
     @RequestMapping(value = "/login/{username}/{password}", method = RequestMethod.GET)
-    public boolean login(@PathVariable("username") String username, @PathVariable("password") String password) {
-        return userService.login(username, password);
+    public String login(@PathVariable("username") String username, @PathVariable("password") String password) {
+        // 判断能否登录
+        User user = userService.login(username, password);
+        if (user == null) {
+            return "";
+        }
+        
+        // 登录成功
+        String token = "";
+        token = JWT.create().withAudience(user.getUserId()+"")// 将 user id 保存到 token 里面
+                .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 1000))// 定义token的有效期
+                .sign(Algorithm.HMAC256(ConstantKey.USER_JWT_KEY));// 加密秘钥，也可以使用用户保持在数据库中的密码字符串
+        return token;
     }
 }

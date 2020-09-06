@@ -49,6 +49,7 @@ public class User {
     private boolean vip; // 是否是VIP
     private double totalPay; // 总共付了多少钱（实付）
     
+    private int loginFailed;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date syncTime;

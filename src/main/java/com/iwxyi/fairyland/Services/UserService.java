@@ -18,13 +18,13 @@ public class UserService {
      * @param passwordHash // 密码 MD5 hashed
      * @return 是否匹配成功
      */
-    public boolean login(String username, String passwordHash) {
+    public User login(String username, String passwordHash) {
         Iterable<User> users = userRepository.findAll();
         for (User user : users) {
             if (user.getUsername().equals(username) && user.getPasswordHash().equals(passwordHash)) {
-                return true;
+                return user;
             }
         }
-        return false;
+        return null;
     }
 }
