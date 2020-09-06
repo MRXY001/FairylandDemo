@@ -8,7 +8,8 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.iwxyi.fairyland.Constant.ConstantKey;
+import com.iwxyi.fairyland.Config.ConstantKey;
+
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -28,11 +29,12 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if ("login".equals(method.getName())) {
             return true;
         }
+        System.out.println("~~~~~~~~~~~~~method.name:" + method.getName());
         // 执行认证
         if (token == null) {
             // 不带token的话会出错，控制台报错
             // 但是问题不大，不用理会它
-            throw new RuntimeException("无token，请重新登录");
+            throw new RuntimeException("无token，请重新登录：" + method.getName());
         }
         // 获取 token 中的 name
         String name;
