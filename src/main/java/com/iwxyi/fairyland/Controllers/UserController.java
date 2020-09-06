@@ -7,6 +7,7 @@ import java.util.Map;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.iwxyi.fairyland.Config.ConstantKey;
+import com.iwxyi.fairyland.Exception.DemoException;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.UserService;
 
@@ -22,6 +23,9 @@ public class UserController {
     @Autowired
     UserService userService;
     
+    /**
+     * 用户注册
+     */
     @PostMapping(value = "/register")
     public String register(@RequestParam("username") String username, 
             @RequestParam("password") String password,
@@ -34,6 +38,9 @@ public class UserController {
         return token;
     }
     
+    /**
+     * 用户登录
+     */
     @PostMapping(value = "/login")
     public String login(@RequestParam("username") String username, @RequestParam("password") String password) {
         // 判断能否登录
@@ -50,9 +57,6 @@ public class UserController {
         return token;
     }
     
-    /* @RequestMapping(value = "/login/{username}/{password}", method = RequestMethod.GET)
-    public String loginG(@PathVariable("username") String username, @PathVariable("password") String password) */ 
-    
     /**
      * 测试token能否使用
      * 1. 登录（此时会报无token）
@@ -61,19 +65,20 @@ public class UserController {
      * @return 测试结果
      */
     @RequestMapping("/testToken")
-    public String testToken() {
-        return "通过验证";
-    }
-    
-    @RequestMapping("/test")
-    public Map<String, Object> test() {
-        if (true) {
-            throw new RuntimeException("尝试异常成功");
-        }
-        // return "验证错误成功";
+    public Map<String, Object> testToken() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("code", 250);
-        map.put("msg", "这是错误内容");
+        map.put("msg", "通过token验证");
         return map;
+    }
+    
+    /**
+     * 单纯的测试（大概也会有黑客从这里进入测试吧？）
+     */
+    @RequestMapping("/test")
+    public void test() {
+        if (true) {
+            throw new DemoException("成功找到了测试", 5001);
+        }
     }
 }

@@ -25,6 +25,9 @@ public class User {
 
     @Size(min = 2, max = 16, message = "昵称长度必须在{min}~{max}之间")
     private String nickname;
+    @NotBlank(message = "手机号码不能为空")
+    @Size(min = 11, max = 11, message = "手机号码长度不正确")
+    @Pattern(regexp = "^(((13[0-9])|(14[579])|(15([0-3]|[5-9]))|(16[6])|(17[0135678])|(18[0-9])|(19[89]))\\d{8})$", message = "手机号格式错误")
     private String phoneNumber;
     private int age;
     private int sex; // 0女，1男

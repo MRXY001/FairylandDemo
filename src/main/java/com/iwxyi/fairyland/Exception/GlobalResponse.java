@@ -1,5 +1,7 @@
 package com.iwxyi.fairyland.Exception;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -7,6 +9,7 @@ import lombok.ToString;
 @Data
 @ToString
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class GlobalResponse<T> {
     protected boolean success = false;
     private T data;
