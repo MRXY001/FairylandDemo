@@ -35,9 +35,6 @@ public class UserService {
         if (userRepository.findByPhoneNumber(phoneNumber) != null) {
             throw new RuntimeException("该手机号已注册");
         }
-        if (username.length() < 2 || username.length() > ConstantValue.USER_NAME_MAX_LENGTH) {
-            throw new RuntimeException("用户名长度必须在2~16之间");
-        }
         
 
         // 密码hash

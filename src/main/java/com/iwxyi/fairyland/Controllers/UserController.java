@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/user", produces = "application/json; charset=GBK")
+@RequestMapping(value = "/user", produces = "application/json;charset=UTF-8")
 public class UserController {
     @Autowired
     UserService userService;

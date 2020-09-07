@@ -73,6 +73,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
         // return GlobalResponse.failed(Throwables.getStackTraceAsString(e), null);
         return GlobalResponse.fail(msg, null);
     }
+    
 
     /**
      * 参数验证处理
@@ -81,7 +82,10 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
     @ResponseStatus(HttpStatus.OK)
     @ExceptionHandler(ConstraintViolationException.class)
     public <T> GlobalResponse<T> constraintViolationExceptionHandler(ConstraintViolationException e) {
-        // logger.error("》》》》》》》》》》ConstraintViolationException", e);
-        return GlobalResponse.fail("参数错误", 600);
+        String str = e.getLocalizedMessage();
+        int start = str.indexOf("interpolatedMessage='") + 21;
+        int end = str.indexOf("', propertyPath=", start);
+        String rst = str.substring(start, end);
+        return GlobalResponse.fail(rst, 500);
     }
 }
