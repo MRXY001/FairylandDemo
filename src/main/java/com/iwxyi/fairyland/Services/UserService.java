@@ -1,5 +1,6 @@
 package com.iwxyi.fairyland.Services;
 
+import com.iwxyi.fairyland.Config.ConstantValue;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Repositories.UserRepository;
 
@@ -25,12 +26,19 @@ public class UserService {
         if (username == null || password == null || phoneNumber == null) {
             throw new RuntimeException("数据不能为空");
         }
+        username = username.trim();
+        password = password.trim();
+        phoneNumber = phoneNumber.trim();
         if (userRepository.findByUsername(username) != null) {
             throw new RuntimeException("用户名已存在");
         }
         if (userRepository.findByPhoneNumber(phoneNumber) != null) {
             throw new RuntimeException("该手机号已注册");
         }
+        if (username.length() < 2 || username.length() > ConstantValue.USER_NAME_MAX_LENGTH) {
+            throw new RuntimeException("用户名长度必须在2~16之间");
+        }
+        
 
         // 密码hash
         String passwordHash = bcryptPasswordEncoder().encode(password);

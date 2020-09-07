@@ -53,7 +53,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
     @ExceptionHandler({ FormatedException.class })
     public <T> GlobalResponse<T> handleException(FormatedException e) {
         // log.error(Throwables.getStackTraceAsString(e)); // 暂时用不了 Throwables
-        return GlobalResponse.failed(e.getMsg(), e.getCode());
+        return GlobalResponse.fail(e.getMsg(), e.getCode());
     }
 
     /**
@@ -69,7 +69,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
         log.error(msg);
         // log.error(Throwables.getStackTraceAsString(e));
         // return GlobalResponse.failed(Throwables.getStackTraceAsString(e), null);
-        return GlobalResponse.failed(msg, null);
+        return GlobalResponse.fail(msg, null);
     }
 
 }

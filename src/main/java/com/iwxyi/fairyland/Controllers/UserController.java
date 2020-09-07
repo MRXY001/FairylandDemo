@@ -1,13 +1,12 @@
 package com.iwxyi.fairyland.Controllers;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.iwxyi.fairyland.Config.ConstantKey;
 import com.iwxyi.fairyland.Exception.FormatedException;
+import com.iwxyi.fairyland.Exception.GlobalResponse;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.UserService;
 
@@ -27,7 +26,7 @@ public class UserController {
      * 用户注册
      */
     @PostMapping(value = "/register")
-    public String register(@RequestParam("username") String username, 
+    public GlobalResponse<?> register(@RequestParam("username") String username, 
             @RequestParam("password") String password,
             @RequestParam("phoneNumber") String phoneNumber) {
         User user = userService.register(username, password, phoneNumber);
@@ -35,14 +34,14 @@ public class UserController {
         String token = JWT.create().withAudience(user.getUserId() + "")// 将 user id 保存到 token 里面
                 .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 1000))// 定义token的有效期
                 .sign(Algorithm.HMAC256(ConstantKey.USER_JWT_KEY));// 加密秘钥，也可以使用用户保持在数据库中的密码字符串
-        return token;
+        return GlobalResponse.success(token);
     }
     
     /**
      * 用户登录
      */
     @PostMapping(value = "/login")
-    public String login(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public GlobalResponse<?> login(@RequestParam("username") String username, @RequestParam("password") String password) {
         // 判断能否登录
         User user = userService.login(username, password);
         if (user == null) {
@@ -54,7 +53,7 @@ public class UserController {
         String token = JWT.create().withAudience(user.getUserId() + "")// 将 user id 保存到 token 里面
                 .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 1000))// 定义token的有效期
                 .sign(Algorithm.HMAC256(ConstantKey.USER_JWT_KEY));// 加密秘钥，也可以使用用户保持在数据库中的密码字符串
-        return token;
+        return GlobalResponse.map("token", token);
     }
     
     /**
@@ -65,11 +64,8 @@ public class UserController {
      * @return 测试结果
      */
     @RequestMapping("/testToken")
-    public Map<String, Object> testToken() {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("code", 250);
-        map.put("msg", "通过token验证");
-        return map;
+    public GlobalResponse<?> testToken() {
+        return GlobalResponse.success("通过token验证");
     }
     
     /**
