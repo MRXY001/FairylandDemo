@@ -1,5 +1,7 @@
 package com.iwxyi.fairyland.Exception;
 
+import javax.validation.ConstraintViolationException;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -72,4 +74,14 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
         return GlobalResponse.fail(msg, null);
     }
 
+    /**
+     * 参数验证处理
+     */
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public <T> GlobalResponse<T> constraintViolationExceptionHandler(ConstraintViolationException e) {
+        // logger.error("》》》》》》》》》》ConstraintViolationException", e);
+        return GlobalResponse.fail("参数错误", 600);
+    }
 }
