@@ -7,7 +7,7 @@ import java.util.Map;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.iwxyi.fairyland.Config.ConstantKey;
-import com.iwxyi.fairyland.Exception.DemoException;
+import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.UserService;
 
@@ -78,7 +78,8 @@ public class UserController {
     @RequestMapping("/test")
     public void test() {
         if (true) {
-            throw new DemoException("成功找到了测试", 5001);
+            throw new FormatedException("成功找到了测试", 5001);
         }
     }
+    
 }

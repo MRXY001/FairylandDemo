@@ -50,8 +50,8 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
      */
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    @ExceptionHandler({ DemoException.class })
-    public <T> GlobalResponse<T> handleException(DemoException e) {
+    @ExceptionHandler({ FormatedException.class })
+    public <T> GlobalResponse<T> handleException(FormatedException e) {
         // log.error(Throwables.getStackTraceAsString(e)); // 暂时用不了 Throwables
         return GlobalResponse.failed(e.getMsg(), e.getCode());
     }

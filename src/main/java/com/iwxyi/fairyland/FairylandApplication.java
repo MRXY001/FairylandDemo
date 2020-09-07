@@ -10,4 +10,5 @@ public class FairylandApplication {
 		SpringApplication.run(FairylandApplication.class, args);
     }
 
+    
 }

@@ -90,6 +90,12 @@
             <artifactId>pagehelper</artifactId>
             <version>4.1.6</version>
         </dependency>
+
+        <!-- 加密 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
         
     </dependencies>
 
