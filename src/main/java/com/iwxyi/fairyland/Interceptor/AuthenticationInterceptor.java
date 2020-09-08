@@ -20,7 +20,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse httpServletResponse,
             Object object) throws Exception {
-        String token = request.getHeader("token");// 从 http 请求头中取出 token
         // 如果不是映射到方法直接通过
         if (!(object instanceof HandlerMethod)) {
             return true;
@@ -29,10 +28,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         Method method = handlerMethod.getMethod();
         String methodName = method.getName();
         // 检查方法名是否是“login”如果是则跳过，也可以加注解，用注解过滤不需要权限的方法
-        if ("login".equals(methodName) || "register".equals(methodName) || "error".equals(methodName)) {
+        if ("error".equals(methodName)) {
             return true;
         }
         // 执行认证
+        String token = request.getHeader("token");// 从 http 请求头中取出 token
         if (token == null) {
             // 不带token的话会出错，控制台报错
             // 但是问题不大，不用理会它

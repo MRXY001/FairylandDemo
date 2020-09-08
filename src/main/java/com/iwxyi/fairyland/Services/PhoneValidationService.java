@@ -37,14 +37,24 @@ public class PhoneValidationService {
      * @return 是否成功
      */
     public boolean validateCaptcha(String number, String captcha) {
-        PhoneValidation validation = phoneValidationRepository.findByNumberAndCaptcha(number, captcha);
+        PhoneValidation validation = phoneValidationRepository.findFirstByNumberOrderByCreateTimeDesc(number);
         if (validation != null) {
-            if (validation.getVerfyCount() > 5) {
+            if (validation.isVerified()) { // 已经使用过的验证码
+                throw new FormatedException("请重新发送验证码");
+            }
+            if (validation.getFailCount() > 3) {
                 throw new FormatedException("验证次数过多，请稍后重试", 250);
             }
-            validation.setVerified(number); // 设置为已经使用
-            return true;
+            if (validation.getCaptcha().equals(captcha)) {
+                validation.setVerified(); // 设置为已经使用
+                phoneValidationRepository.save(validation);
+                return true;
+            }
+            // 验证失败，失败次数+1
+            validation.setFailCount(validation.getFailCount() + 1);
+            phoneValidationRepository.save(validation);
+            throw new FormatedException("请输入正确的验证码");
         }
-        return false;
+        throw new FormatedException("未发送" + number + "的验证码");
     }
 }

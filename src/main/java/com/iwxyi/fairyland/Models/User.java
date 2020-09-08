@@ -1,6 +1,6 @@
 package com.iwxyi.fairyland.Models;
 
-import java.sql.Date;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -93,6 +93,13 @@ public class User {
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date createTime;
 
+    public User(String username, String passwordHash, String phoneNumber, Date createTime) {
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.phoneNumber = phoneNumber;
+        this.createTime = createTime;
+    }
+    
     // 方便调试时查看数据
     public String simpleString() {
         return "User{ " + "id=" + userId + ", username=" + username + "}";

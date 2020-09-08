@@ -8,6 +8,7 @@ import com.iwxyi.fairyland.Config.ConstantKey;
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
 import com.iwxyi.fairyland.Models.User;
+import com.iwxyi.fairyland.Services.PhoneValidationService;
 import com.iwxyi.fairyland.Services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,18 +20,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/user", produces = "application/json;charset=UTF-8")
-@CrossOrigin(allowCredentials="true",allowedHeaders="*") //解决跨域问题
+@CrossOrigin(allowCredentials = "true", allowedHeaders = "*") // 解决跨域问题
 public class UserController {
     @Autowired
     UserService userService;
-    
+    @Autowired
+    PhoneValidationService phoneValidationService;
+
     /**
      * 用户注册
      */
     @PostMapping(value = "/register")
-    public GlobalResponse<?> register(@RequestParam("username") String username, 
-            @RequestParam("password") String password,
-            @RequestParam("phoneNumber") String phoneNumber) {
+    public GlobalResponse<?> register(@RequestParam("username") String username,
+            @RequestParam("password") String password, @RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam("captcha") String captcha) {
+        // 判断验证码
+        boolean valid = phoneValidationService.validateCaptcha(phoneNumber, captcha);
+        if (!valid) {
+            throw new RuntimeException("验证码错误");
+        }
+        
+        // 尝试注册
         User user = userService.register(username, password, phoneNumber);
         // 注册成功，创建token
         String token = JWT.create().withAudience(user.getUserId() + "")// 将 user id 保存到 token 里面
@@ -38,12 +48,13 @@ public class UserController {
                 .sign(Algorithm.HMAC256(ConstantKey.USER_JWT_KEY));// 加密秘钥，也可以使用用户保持在数据库中的密码字符串
         return GlobalResponse.map("token", token);
     }
-    
+
     /**
      * 用户登录
      */
     @PostMapping(value = "/login")
-    public GlobalResponse<?> login(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public GlobalResponse<?> login(@RequestParam("username") String username,
+            @RequestParam("password") String password) {
         // 判断能否登录
         User user = userService.login(username, password);
         if (user == null) {
@@ -57,19 +68,23 @@ public class UserController {
                 .sign(Algorithm.HMAC256(ConstantKey.USER_JWT_KEY));// 加密秘钥，也可以使用用户保持在数据库中的密码字符串
         return GlobalResponse.map("token", token);
     }
-    
+
+    @RequestMapping("/sendPhoneValidation")
+    public GlobalResponse<?> sendPhoneValidation(@RequestParam("phoneNumber") String phoneNumber) {
+        phoneValidationService.sendCaptcha(phoneNumber);
+        return GlobalResponse.success();
+    }
+
     /**
-     * 测试token能否使用
-     * 1. 登录（此时会报无token）
-     * 2. 获取生成的token
-     * 3. 使用postMan等在header放入token=xxx
+     * 测试token能否使用 1. 登录（此时会报无token） 2. 获取生成的token 3. 使用postMan等在header放入token=xxx
+     * 
      * @return 测试结果
      */
     @RequestMapping("/testToken")
     public GlobalResponse<?> testToken() {
         return GlobalResponse.success("通过token验证");
     }
-    
+
     /**
      * 单纯的测试（大概也会有黑客从这里进入测试吧？）
      */
@@ -79,5 +94,5 @@ public class UserController {
             throw new FormatedException("成功找到了测试", 5001);
         }
     }
-    
+
 }

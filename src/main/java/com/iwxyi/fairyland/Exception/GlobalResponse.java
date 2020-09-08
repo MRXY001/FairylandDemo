@@ -24,6 +24,10 @@ public class GlobalResponse<T> {
         this.success = success;
     }
 
+    public static <T> GlobalResponse<T> success() {
+        return new GlobalResponse<>(null, true);
+    }
+
     public static <T> GlobalResponse<T> success(T data) {
         return new GlobalResponse<>(data, true);
     }

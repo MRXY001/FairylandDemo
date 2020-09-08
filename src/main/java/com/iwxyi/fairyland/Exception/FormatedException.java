@@ -12,6 +12,11 @@ import lombok.NoArgsConstructor;
 public class FormatedException extends RuntimeException {
     private static final long serialVersionUID = 1L;
     
+    public FormatedException(String msg) {
+        this.msg = msg;
+        this.code = 500;
+    }
+    
     private String msg;
     private Integer code;
 }

@@ -5,6 +5,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface PhoneValidationRepository extends CrudRepository<PhoneValidation, Long> {
     
-    PhoneValidation findByNumberAndCaptcha(String number, String captcha);
+    PhoneValidation findFirstByNumberOrderByCreateTimeDesc(String number);
 
 }

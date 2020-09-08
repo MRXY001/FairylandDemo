@@ -1,5 +1,9 @@
 package com.iwxyi.fairyland.Services;
 
+
+
+import java.util.Date;
+
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Repositories.UserRepository;
 
@@ -28,6 +32,8 @@ public class UserService {
         username = username.trim();
         password = password.trim();
         phoneNumber = phoneNumber.trim();
+        
+        // 判断能否注册
         if (userRepository.findByUsername(username) != null) {
             throw new RuntimeException("用户名已存在");
         }
@@ -43,6 +49,7 @@ public class UserService {
         user.setUsername(username);
         user.setPasswordHash(passwordHash);
         user.setPhoneNumber(phoneNumber);
+        user.setCreateTime(new Date());
 
         user = userRepository.save(user); // 在这里创建了ID以及其他默认值
 
