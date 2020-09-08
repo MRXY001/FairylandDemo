@@ -1,6 +1,5 @@
 package com.iwxyi.fairyland.Services;
 
-import com.iwxyi.fairyland.Config.ConstantValue;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Repositories.UserRepository;
 
@@ -35,7 +34,6 @@ public class UserService {
         if (userRepository.findByPhoneNumber(phoneNumber) != null) {
             throw new RuntimeException("该手机号已注册");
         }
-        
 
         // 密码hash
         String passwordHash = bcryptPasswordEncoder().encode(password);

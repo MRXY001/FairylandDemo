@@ -11,6 +11,7 @@ import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/user", produces = "application/json;charset=UTF-8")
+@CrossOrigin(allowCredentials="true",allowedHeaders="*") //解决跨域问题
 public class UserController {
     @Autowired
     UserService userService;
@@ -34,7 +36,7 @@ public class UserController {
         String token = JWT.create().withAudience(user.getUserId() + "")// 将 user id 保存到 token 里面
                 .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 1000))// 定义token的有效期
                 .sign(Algorithm.HMAC256(ConstantKey.USER_JWT_KEY));// 加密秘钥，也可以使用用户保持在数据库中的密码字符串
-        return GlobalResponse.success(token);
+        return GlobalResponse.map("token", token);
     }
     
     /**
