@@ -2,6 +2,7 @@ package com.iwxyi.fairyland.Services;
 
 import java.io.File;
 import java.util.List;
+import java.util.Random;
 
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
@@ -23,9 +24,18 @@ public class MailService {
     private JavaMailSender mailSender;
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
-
+    
+    public void sendMailValidation(String mail)
+    {
+        String checkCode = String.valueOf(new Random().nextInt(899999) + 100000);
+        String message = "您的注册验证码为：" + checkCode;
+        sendSimpleMail(mail, "注册验证码", message);
+        // TODO: 存至数据库
+    }
+    
     /**
      * 发送普通邮件
+     * 因为发送邮件可能是有多种情况，所以和验证的方式不同，需要多个详细的参数
      */
     public void sendSimpleMail(String to, String title, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
