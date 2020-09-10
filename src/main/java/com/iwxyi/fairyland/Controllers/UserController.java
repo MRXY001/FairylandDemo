@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
+import com.iwxyi.fairyland.Interceptor.CurrentUser;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.LoginService;
 import com.iwxyi.fairyland.Services.MailService;
@@ -12,6 +13,8 @@ import com.iwxyi.fairyland.Services.UserService;
 import com.iwxyi.fairyland.Tools.IpUtil;
 import com.iwxyi.fairyland.Tools.TokenUtil;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +37,8 @@ public class UserController {
     private LoginService loginService;
     @Autowired
     private HttpServletRequest request;
+    
+    Logger logger = LoggerFactory.getLogger(UserController.class);
 
     /**
      * 用户注册
@@ -97,6 +102,18 @@ public class UserController {
     @ResponseBody
     public GlobalResponse<?> sendMailValidation(@RequestParam("mail") String email) {
         mailService.sendMailValidation(email);
+        return GlobalResponse.success();
+    }
+    
+    /**
+     * 修改昵称
+     */
+    @RequestMapping("/setNickname")
+    @ResponseBody
+    public GlobalResponse<?> setNiconame(@CurrentUser Long userId, String nickname) {
+        User user = userService.getUserByUserId(userId);
+        user.setNickname(nickname);
+        userService.save(user);
         return GlobalResponse.success();
     }
 

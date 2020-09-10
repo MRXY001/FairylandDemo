@@ -27,7 +27,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if ("error".equals(methodName)) {
             return true;
         }
-
+        
         // 执行认证，获取header中的token字段
         // 如果不是允许的方法，不会到达这边来，因此是必须需要token
         String token = request.getHeader(ConstantKey.TOKEN_HEADER);// 从 http 请求头中取出 token

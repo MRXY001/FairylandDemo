@@ -1,12 +1,12 @@
 package com.iwxyi.fairyland.Services;
 
-
-
 import java.util.Date;
 
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Repositories.UserRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 public class UserService {
     @Autowired // 装配数据库操作类
     UserRepository userRepository;
+
+    Logger logger = LoggerFactory.getLogger(UserService.class);
 
     /**
      * 注册
@@ -32,7 +34,7 @@ public class UserService {
         username = username.trim();
         password = password.trim();
         phoneNumber = phoneNumber.trim();
-        
+
         // 判断能否注册
         if (userRepository.findByUsername(username) != null) {
             throw new RuntimeException("用户名已存在");
@@ -83,8 +85,12 @@ public class UserService {
     public BCryptPasswordEncoder bcryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
     public User getUserByUserId(Long userId) {
         return userRepository.findByUserId(userId);
+    }
+
+    public void save(User user) {
+        userRepository.save(user);
     }
 }

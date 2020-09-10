@@ -27,8 +27,8 @@ public class SyncController {
     UserService userService;
     @Autowired
     private HttpServletRequest request; // 注入到类或者方法参数中，自动获取
-    Long userId = Long.parseLong(request.getAttribute(ConstantKey.CURRENT_USER).toString());
-    User currentUser = userService.getUserByUserId(userId);
+    // Long userId = Long.parseLong(request.getAttribute(ConstantKey.CURRENT_USER).toString());
+    // User currentUser = userService.getUserByUserId(userId);
 
     /**
      * 获取这一段时间之后的内容

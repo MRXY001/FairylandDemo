@@ -9,7 +9,6 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.iwxyi.fairyland.Config.ConstantKey;
 import com.iwxyi.fairyland.Models.User;
-import com.iwxyi.fairyland.Services.UserService;
 
 public class TokenUtil {
     public static String createTokenByUser(User user) {
@@ -26,11 +25,6 @@ public class TokenUtil {
             throw new RuntimeException("无效 token，请重新登录");
         }
         return true;
-    }
-    
-    public static User getUserByToken(String token) {
-        Long userId = Long.parseLong(getUserIdByToken(token));
-        return (new UserService()).getUserByUserId(userId);
     }
     
     public static String getUserIdByToken(String token) {
