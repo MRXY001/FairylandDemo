@@ -1,12 +1,7 @@
 package com.iwxyi.fairyland.Controllers;
 
-import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.iwxyi.fairyland.Config.ConstantKey;
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
 import com.iwxyi.fairyland.Models.User;
@@ -24,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @RestController
 @RequestMapping(value = "/user", produces = "application/json;charset=UTF-8")
@@ -39,6 +32,8 @@ public class UserController {
     private MailService mailService;
     @Autowired
     private LoginService loginService;
+    @Autowired
+    private HttpServletRequest request;
 
     /**
      * 用户注册
@@ -47,21 +42,19 @@ public class UserController {
     public GlobalResponse<?> register(@RequestParam("username") String username,
             @RequestParam("password") String password, @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("captcha") String captcha) {
-        // 判断验证码
-        boolean valid = phoneValidationService.validateCaptcha(phoneNumber, captcha);
-        if (!valid) {
-            throw new RuntimeException("验证码错误");
-        }
+        // 判断手机验证码
+        phoneValidationService.validateCaptcha(phoneNumber, captcha);
 
         // 尝试注册
         User user = userService.register(username, password, phoneNumber);
+
         // 记入登录历史
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                .getRequest();
         String ip = IpUtil.getIpAddr(request);
         loginService.saveLogin(user.getUserId(), username, ip, "初次注册");
+
         // 注册成功，创建token
         String token = TokenUtil.createTokenByUser(user);
+
         return GlobalResponse.map("token", token);
     }
 
@@ -76,19 +69,15 @@ public class UserController {
             @RequestParam("password") String password) {
         // 判断能否登录
         User user = userService.login(username, password);
-        if (user == null) {
-            throw new RuntimeException("用户名或密码错误");
-        }
 
         // 记入登录历史
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                .getRequest();
         String ip = IpUtil.getIpAddr(request);
         loginService.saveLogin(user.getUserId(), username, ip, "登录");
 
         // 登录成功，创建token
         // 如果之前就带有token, 会把原来的token覆盖掉
         String token = TokenUtil.createTokenByUser(user);
+
         return GlobalResponse.map("token", token);
     }
 
@@ -126,9 +115,7 @@ public class UserController {
      */
     @RequestMapping("/test")
     public void test() {
-        if (true) {
-            throw new FormatedException("恭喜您，成功找到了测试入口~", 5001);
-        }
+        throw new FormatedException("恭喜您，成功找到了测试入口~", 5001);
     }
 
 }

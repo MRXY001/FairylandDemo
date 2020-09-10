@@ -25,7 +25,7 @@ public class PhoneValidationService {
         Date time = new Date();
         PhoneValidation validation = new PhoneValidation(number, captcha, time);
         phoneValidationRepository.save(validation);
-        
+
         // 调用API发送验证码
     }
 
@@ -38,23 +38,26 @@ public class PhoneValidationService {
      */
     public boolean validateCaptcha(String number, String captcha) {
         PhoneValidation validation = phoneValidationRepository.findFirstByNumberOrderByCreateTimeDesc(number);
-        if (validation != null) {
-            if (validation.isVerified()) { // 已经使用过的验证码
-                throw new FormatedException("请重新发送验证码");
-            }
-            if (validation.getFailCount() > 3) {
-                throw new FormatedException("验证次数过多，请稍后重试", 250);
-            }
-            if (validation.getCaptcha().equals(captcha)) {
-                validation.setVerified(); // 设置为已经使用
-                phoneValidationRepository.save(validation);
-                return true;
-            }
-            // 验证失败，失败次数+1
-            validation.setFailCount(validation.getFailCount() + 1);
-            phoneValidationRepository.save(validation);
-            throw new FormatedException("请输入正确的验证码");
+        if (validation == null) { // 未检测到这个号码
+            throw new FormatedException("未发送" + number + "的验证码");
         }
-        throw new FormatedException("未发送" + number + "的验证码");
+        if (validation.isVerified()) { // 已经使用过的验证码
+            throw new FormatedException("请重新发送验证码");
+        }
+        if (validation.getFailCount() > 3) { // 多次验证失败
+            throw new FormatedException("验证次数过多，请稍后重试", 250);
+        }
+        
+        // 进行验证，判断是否正确
+        if (validation.getCaptcha().equals(captcha)) {
+            // 验证成功
+            validation.setVerified(); // 设置为已经使用
+            phoneValidationRepository.save(validation);
+            return true;
+        }
+        // 验证失败，失败次数+1
+        validation.setFailCount(validation.getFailCount() + 1);
+        phoneValidationRepository.save(validation);
+        throw new FormatedException("请输入正确的验证码");
     }
 }

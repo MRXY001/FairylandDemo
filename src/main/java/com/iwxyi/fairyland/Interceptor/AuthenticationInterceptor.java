@@ -11,6 +11,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.iwxyi.fairyland.Config.ConstantKey;
+import com.iwxyi.fairyland.Tools.TokenUtil;
 
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -24,38 +25,40 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if (!(object instanceof HandlerMethod)) {
             return true;
         }
+        // 检查方法名是否是“error”，如果是则跳过。也可以加注解，用注解过滤不需要权限的方法
         HandlerMethod handlerMethod = (HandlerMethod) object;
         Method method = handlerMethod.getMethod();
         String methodName = method.getName();
-        // 检查方法名是否是“error”，如果是则跳过。也可以加注解，用注解过滤不需要权限的方法
         if ("error".equals(methodName)) {
             return true;
         }
+        
         // 执行认证，获取header中的token字段
         // 如果不是允许的方法，不会到达这边来，因此是必须需要token
         String token = request.getHeader(ConstantKey.TOKEN_HEADER);// 从 http 请求头中取出 token
         if (token == null) {
             // 不带token的话会出错，控制台报错
             // 但是问题不大，不用理会它
-            // throw new ServiceException(401, "无 token，请登录：" + methodName);
             throw new RuntimeException("无 token，请登录：" + methodName);
         }
+        
         // 获取 token 中的 name
         String userId;
         try {
-            userId = JWT.decode(token).getAudience().get(0);
+            userId = TokenUtil.getUserIdByToken(token);
         } catch (JWTDecodeException j) {
-            // throw new ServiceException(401, "无效 token，请重新登录：" + methodName);
             throw new RuntimeException("无效 token，请重新登录");
         }
+        
         // 验证 token
         JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(ConstantKey.USER_JWT_KEY)).build();
         try {
             jwtVerifier.verify(token);
         } catch (JWTVerificationException e) {
-            // throw new ServiceException(401, "无效 token，请重新登录：" + methodName);
             throw new RuntimeException("无效 token，请重新登录");
         }
+        
+        // 将用户信息放入到request中，全局可用
         request.setAttribute(ConstantKey.CURRENT_USER, userId); // 保存解析出来的UserID
         return true;
     }

@@ -16,7 +16,7 @@ public class TokenUtil {
     }
     
     public static User getUserByToken(String token) {
-        String userId = getUserIdByToken(token);
+        Long userId = Long.parseLong(getUserIdByToken(token));
         return (new UserService()).getUserByUserId(userId);
     }
     

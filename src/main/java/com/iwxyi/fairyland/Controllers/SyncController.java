@@ -6,7 +6,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.iwxyi.fairyland.Config.ConstantKey;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
+import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.SyncBookService;
+import com.iwxyi.fairyland.Services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,8 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @RestController
 @RequestMapping(value = "/sync", produces = "application/json;charset=UTF-8")
@@ -23,11 +23,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class SyncController {
     @Autowired
     SyncBookService syncBookService;
-
-    ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder
-            .getRequestAttributes();
-    HttpServletRequest request = servletRequestAttributes.getRequest();
+    @Autowired
+    UserService userService;
+    @Autowired
+    private HttpServletRequest request; // 注入到类或者方法参数中，自动获取
     Long userId = Long.parseLong(request.getAttribute(ConstantKey.CURRENT_USER).toString());
+    User currentUser = userService.getUserByUserId(userId);
 
     /**
      * 获取这一段时间之后的内容

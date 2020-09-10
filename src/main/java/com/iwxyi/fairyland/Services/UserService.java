@@ -67,13 +67,13 @@ public class UserService {
         // 找到要登录的用户
         User user = userRepository.findByUsernameOrPhoneNumberOrMailAddress(username, username, username);
         if (user == null) {
-            return null;
+            throw new RuntimeException("用户未注册");
         }
         // 判断密码是否正确
         if (bcryptPasswordEncoder().matches(password, user.getPasswordHash())) {
             return user;
         }
-        return null;
+        throw new RuntimeException("账号或密码错误");
     }
 
     /**
@@ -84,7 +84,7 @@ public class UserService {
         return new BCryptPasswordEncoder();
     }
     
-    public User getUserByUserId(String userId) {
+    public User getUserByUserId(Long userId) {
         return userRepository.findByUserId(userId);
     }
 }
