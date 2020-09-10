@@ -34,6 +34,7 @@ public class InterceptorConfig extends WebMvcConfigurationSupport {
     @Override
     protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         argumentResolvers.add(currentUserMethodArgumentResolver());
+        argumentResolvers.add(currentUserIdMethodArgumentResolver());
         super.addArgumentResolvers(argumentResolvers);
     }
 
@@ -43,5 +44,10 @@ public class InterceptorConfig extends WebMvcConfigurationSupport {
     @Bean
     public CurrentUserMethodArgumentResolver currentUserMethodArgumentResolver() {
         return new CurrentUserMethodArgumentResolver();
+    }
+    
+    @Bean
+    public CurrentUserIdMethodArgumentResolver currentUserIdMethodArgumentResolver() {
+        return new CurrentUserIdMethodArgumentResolver();
     }
 }

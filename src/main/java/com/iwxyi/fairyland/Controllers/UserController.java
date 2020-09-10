@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
 import com.iwxyi.fairyland.Interceptor.CurrentUser;
+import com.iwxyi.fairyland.Interceptor.LoginRequired;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.LoginService;
 import com.iwxyi.fairyland.Services.MailService;
@@ -108,9 +109,10 @@ public class UserController {
     /**
      * 修改昵称
      */
-    @RequestMapping("/setNickname")
+    @RequestMapping("/modifyNickname")
     @ResponseBody
-    public GlobalResponse<?> setNiconame(@CurrentUser User user, String nickname) {
+    @LoginRequired
+    public GlobalResponse<?> modifyNickname(@CurrentUser User user, String nickname) {
         // User user = userService.getUserByUserId(userId);
         user.setNickname(nickname);
         userService.save(user);
