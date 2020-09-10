@@ -110,8 +110,8 @@ public class UserController {
      */
     @RequestMapping("/setNickname")
     @ResponseBody
-    public GlobalResponse<?> setNiconame(@CurrentUser Long userId, String nickname) {
-        User user = userService.getUserByUserId(userId);
+    public GlobalResponse<?> setNiconame(@CurrentUser User user, String nickname) {
+        // User user = userService.getUserByUserId(userId);
         user.setNickname(nickname);
         userService.save(user);
         return GlobalResponse.success();

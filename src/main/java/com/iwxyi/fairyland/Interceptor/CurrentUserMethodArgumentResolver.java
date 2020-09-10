@@ -1,6 +1,7 @@
 package com.iwxyi.fairyland.Interceptor;
 
 import com.iwxyi.fairyland.Config.ConstantKey;
+import com.iwxyi.fairyland.Models.User;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -19,7 +20,7 @@ public class CurrentUserMethodArgumentResolver implements HandlerMethodArgumentR
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(CurrentUser.class)
-                && parameter.getParameterType().isAssignableFrom(Long.class);
+                && parameter.getParameterType().isAssignableFrom(User.class);
     }
 
     /**
@@ -28,6 +29,6 @@ public class CurrentUserMethodArgumentResolver implements HandlerMethodArgumentR
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
             NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-        return (Long) webRequest.getAttribute(ConstantKey.CURRENT_USER, RequestAttributes.SCOPE_REQUEST);
+        return (User) webRequest.getAttribute(ConstantKey.CURRENT_USER, RequestAttributes.SCOPE_REQUEST);
     }
 }

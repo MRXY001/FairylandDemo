@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.iwxyi.fairyland.Config.ConstantKey;
+import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Tools.TokenUtil;
 
 import org.springframework.web.method.HandlerMethod;
@@ -36,13 +37,14 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
 
         // 获取 token 中的 name
-        String userId = TokenUtil.getUserIdByToken(token);
+        // String userId = TokenUtil.getUserIdByToken(token);
+        User user = TokenUtil.getUserByToken(token);
 
         // 验证 token
         TokenUtil.verifyToken(token);
 
         // 将用户信息放入到request中，全局可用
-        request.setAttribute(ConstantKey.CURRENT_USER, userId); // 保存解析出来的UserID
+        request.setAttribute(ConstantKey.CURRENT_USER, user); // 保存解析出来的UserID
         return true; // true时才进行处理该请求，false则忽略后续请求
     }
 
