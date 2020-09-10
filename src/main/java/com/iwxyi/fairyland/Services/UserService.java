@@ -2,6 +2,8 @@ package com.iwxyi.fairyland.Services;
 
 import java.util.Date;
 
+import com.iwxyi.fairyland.Config.ConstantValue;
+import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Repositories.UserRepository;
 
@@ -51,6 +53,7 @@ public class UserService {
         user.setUsername(username);
         user.setPasswordHash(passwordHash);
         user.setPhoneNumber(phoneNumber);
+        user.setNickname(username); // 设置默认昵称为用户名
         user.setCreateTime(new Date());
 
         user = userRepository.save(user); // 在这里创建了ID以及其他默认值
@@ -90,7 +93,15 @@ public class UserService {
         return userRepository.findByUserId(userId);
     }
 
-    public void save(User user) {
+    public boolean setNickname(User user, String nickname) {
+        Date prevTime = user.getNicknameModifyTime();
+        Date currTime = new Date();
+        if (prevTime != null && prevTime.getTime() + ConstantValue.NICKNAME_MODIFY_INTERVAL > currTime.getTime()) {
+            throw new FormatedException("一周只能修改一次昵称");
+        }
+        user.setNickname(nickname);
+        user.setNicknameModifyTime(currTime);
         userRepository.save(user);
+        return true;
     }
 }

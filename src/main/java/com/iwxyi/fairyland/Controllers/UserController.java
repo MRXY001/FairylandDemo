@@ -113,9 +113,7 @@ public class UserController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> modifyNickname(@CurrentUser User user, String nickname) {
-        // User user = userService.getUserByUserId(userId);
-        user.setNickname(nickname);
-        userService.save(user);
+        userService.setNickname(user, nickname);
         return GlobalResponse.success();
     }
 

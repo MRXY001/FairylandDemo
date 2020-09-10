@@ -16,7 +16,7 @@ public class InterceptorConfig extends WebMvcConfigurationSupport {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         String[] addPath = { "/**" };
-        String[] excludePath = { "/user/login", "/user/register", "/user/sendPhoneValidation" };
+        String[] excludePath = {};
         registry.addInterceptor(authenticationInterceptor()).addPathPatterns(addPath).excludePathPatterns(excludePath);
     }
 
@@ -45,7 +45,7 @@ public class InterceptorConfig extends WebMvcConfigurationSupport {
     public CurrentUserMethodArgumentResolver currentUserMethodArgumentResolver() {
         return new CurrentUserMethodArgumentResolver();
     }
-    
+
     @Bean
     public CurrentUserIdMethodArgumentResolver currentUserIdMethodArgumentResolver() {
         return new CurrentUserIdMethodArgumentResolver();

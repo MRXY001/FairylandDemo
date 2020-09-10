@@ -45,7 +45,7 @@ public class User {
     @Max(2)
     private int sex; // 0女，1男
     @Pattern(regexp = "^([\\u4e00-\\u9fa5]{1,20}|[a-zA-Z\\.\\s]{1,20})$", message = "姓名格式错误")
-    private String readname; // 真实姓名
+    private String realname; // 真实姓名
     @Pattern(regexp = "(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)", message = "身份证格式错误")
     private String identityCard; // 实名身份证
     @Min(0)
@@ -60,7 +60,7 @@ public class User {
     @Pattern(regexp = "^[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*@[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*\\.[a-z]{2,}$", message = "邮箱格式错误")
     private String mailAddress;
     @Length(min = 0, max = 20, message = "签名长度不能超过20字")
-    private String mooto;
+    private String motto;
     @Pattern(regexp = "(http|ftp|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?", message = "个人主页配置出错")
     private String homePage;
 
@@ -87,11 +87,11 @@ public class User {
     @Min(0)
     private int loginFailedCount; // 出错次数
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date syncTime;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date createTime;
+    private Date blockTime;
+    private Date nicknameModifyTime;
 
     public User(String username, String passwordHash, String phoneNumber, Date createTime) {
         this.username = username;
