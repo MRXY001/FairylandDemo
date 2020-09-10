@@ -83,4 +83,8 @@ public class UserService {
     public BCryptPasswordEncoder bcryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+    
+    public User getUserByUserId(String userId) {
+        return userRepository.findByUserId(userId);
+    }
 }

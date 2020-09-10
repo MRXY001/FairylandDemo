@@ -27,12 +27,13 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         HandlerMethod handlerMethod = (HandlerMethod) object;
         Method method = handlerMethod.getMethod();
         String methodName = method.getName();
-        // 检查方法名是否是“login”如果是则跳过，也可以加注解，用注解过滤不需要权限的方法
+        // 检查方法名是否是“error”，如果是则跳过。也可以加注解，用注解过滤不需要权限的方法
         if ("error".equals(methodName)) {
             return true;
         }
-        // 执行认证
-        String token = request.getHeader("token");// 从 http 请求头中取出 token
+        // 执行认证，获取header中的token字段
+        // 如果不是允许的方法，不会到达这边来，因此是必须需要token
+        String token = request.getHeader(ConstantKey.TOKEN_HEADER);// 从 http 请求头中取出 token
         if (token == null) {
             // 不带token的话会出错，控制台报错
             // 但是问题不大，不用理会它
@@ -55,7 +56,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             // throw new ServiceException(401, "无效 token，请重新登录：" + methodName);
             throw new RuntimeException("无效 token，请重新登录");
         }
-        request.setAttribute("user_id", userId); // 保存解析出来的UserID
+        request.setAttribute(ConstantKey.CURRENT_USER, userId); // 保存解析出来的UserID
         return true;
     }
 

@@ -15,6 +15,7 @@ import com.iwxyi.fairyland.Services.MailService;
 import com.iwxyi.fairyland.Services.PhoneValidationService;
 import com.iwxyi.fairyland.Services.UserService;
 import com.iwxyi.fairyland.Tools.IpUtil;
+import com.iwxyi.fairyland.Tools.TokenUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -60,9 +61,7 @@ public class UserController {
         String ip = IpUtil.getIpAddr(request);
         loginService.saveLogin(user.getUserId(), username, ip, "初次注册");
         // 注册成功，创建token
-        String token = JWT.create().withAudience(user.getUserId() + "")// 将 user id 保存到 token 里面
-                .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 1000))// 定义token的有效期
-                .sign(Algorithm.HMAC256(ConstantKey.USER_JWT_KEY));// 加密秘钥，也可以使用用户保持在数据库中的密码字符串
+        String token = TokenUtil.createTokenByUser(user);
         return GlobalResponse.map("token", token);
     }
 
@@ -89,9 +88,7 @@ public class UserController {
 
         // 登录成功，创建token
         // 如果之前就带有token, 会把原来的token覆盖掉
-        String token = JWT.create().withAudience(user.getUserId() + "")// 将 user id 保存到 token 里面
-                .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 1000))// 定义token的有效期
-                .sign(Algorithm.HMAC256(ConstantKey.USER_JWT_KEY));// 加密秘钥，也可以使用用户保持在数据库中的密码字符串
+        String token = TokenUtil.createTokenByUser(user);
         return GlobalResponse.map("token", token);
     }
 
