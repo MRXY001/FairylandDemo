@@ -1,5 +1,34 @@
 package com.iwxyi.fairyland.Models;
 
+import java.util.Date;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+import org.hibernate.validator.constraints.Length;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@NoArgsConstructor
 public class SyncChapter {
-    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long chapterIndex;
+    private Long bookId;
+    private Long userId;
+    private String chapterId;
+    @Length(min = 1, max = 20, message = "章节名不能超过20个字")
+    private String title;
+    private String content;
+    private Date createTime;
+    private Date uploadTime;
+    private Date modifyTime;
+    private int publishState;
+    private boolean deleted;
+
 }

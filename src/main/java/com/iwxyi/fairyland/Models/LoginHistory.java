@@ -13,13 +13,14 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-public class LoginHistory {
+public class LoginHistory { 
     @Id // 主键
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long loginId;
     private Long userId;
     private String ip;
     private String loginBy;
+    private boolean success;
     private String message;
     private Date time;
 }

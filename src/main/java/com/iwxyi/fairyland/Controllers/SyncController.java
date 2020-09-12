@@ -2,11 +2,7 @@ package com.iwxyi.fairyland.Controllers;
 
 import java.sql.Timestamp;
 
-import javax.servlet.http.HttpServletRequest;
-
-import com.iwxyi.fairyland.Config.ConstantKey;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
-import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.SyncBookService;
 import com.iwxyi.fairyland.Services.UserService;
 
@@ -25,11 +21,17 @@ public class SyncController {
     SyncBookService syncBookService;
     @Autowired
     UserService userService;
-    @Autowired
-    private HttpServletRequest request; // 注入到类或者方法参数中，自动获取
-    // Long userId = Long.parseLong(request.getAttribute(ConstantKey.CURRENT_USER).toString());
-    // User currentUser = userService.getUserByUserId(userId);
 
+    /**
+     * 准备进行同步，进行ID的匹配等等
+     */
+    @PostMapping(value = "/startSync")
+    @ResponseBody
+    public GlobalResponse<?> startSync() {
+
+        return new GlobalResponse<>();
+    }
+    
     /**
      * 获取这一段时间之后的内容
      * 包括：作品（目录）、章节、大纲、名片库、名片等
@@ -41,6 +43,24 @@ public class SyncController {
     @ResponseBody
     public GlobalResponse<?> downloadUpdated(Timestamp time) {
 
+        return new GlobalResponse<>();
+    }
+
+    /**
+     * 下载作品的目录 !注意所有下载都需要判断时间戳，如果本地有更新则不覆盖
+     */
+    @PostMapping(value = "/downloadBookCatalog")
+    @ResponseBody
+    public GlobalResponse<?> downloadBookCatalog(String bookId) {
+        return new GlobalResponse<>();
+    }
+
+    /**
+     * 下载章节/大纲等内容
+     */
+    @PostMapping(value = "/downloadChapterContent")
+    @ResponseBody
+    public GlobalResponse<?> downloadChapterContent(String chapterId, int chapterType) {
         return new GlobalResponse<>();
     }
 
@@ -61,25 +81,6 @@ public class SyncController {
     @PostMapping(value = "/uploadChapterContent")
     @ResponseBody
     public GlobalResponse<?> uploadChapterContent(String chapterId, String content, int chapterType) {
-        return new GlobalResponse<>();
-    }
-    
-    /**
-     * 下载作品的目录
-     * !注意所有下载都需要判断时间戳，如果本地有更新则不覆盖
-     */
-    @PostMapping(value = "/downloadBookCatalog")
-    @ResponseBody
-    public GlobalResponse<?>downloadBookCatalog(String bookId) {
-        return new GlobalResponse<>();
-    }
-    
-    /**
-     * 下载章节/大纲等内容
-     */
-    @PostMapping(value = "/downloadChapterContent")
-    @ResponseBody
-    public GlobalResponse<?>downloadChapterContent(String chapterId, int chapterType) {
         return new GlobalResponse<>();
     }
 }
