@@ -49,12 +49,7 @@ public class UserService {
         String passwordHash = bcryptPasswordEncoder().encode(password);
 
         // 真正注册的代码
-        User user = new User();
-        user.setUsername(username);
-        user.setPasswordHash(passwordHash);
-        user.setPhoneNumber(phoneNumber);
-        user.setNickname(username); // 设置默认昵称为用户名
-        user.setCreateTime(new Date());
+        User user = new User(username, passwordHash, phoneNumber, new Date());
 
         user = userRepository.save(user); // 在这里创建了ID以及其他默认值
 
@@ -74,11 +69,90 @@ public class UserService {
         if (user == null) {
             throw new RuntimeException("用户未注册");
         }
+        // 判断是否处在登录出错冻结状态
+        if (user.getLoginForbidTime() != null) {
+            Long delta = user.getLoginForbidTime().getTime() - (new Date()).getTime();
+            if (delta > 0) {
+                delta /= 1000; // 转换为秒
+                String time;
+                if (delta < 60) {
+                    time = delta + "秒";
+                } else if (delta < 60 * 60) {
+                    time = delta / 60 + "分钟";
+                } else if (delta < 60 * 60 * 30) {
+                    time = delta / 60 / 60 + "小时";
+                } else {
+                    throw new FormatedException("太多次错误，建议重设密码");
+                }
+                throw new FormatedException("多次密码错误，请在" + time + "后再试");
+            }
+        }
+        
         // 判断密码是否正确
         if (bcryptPasswordEncoder().matches(password, user.getPasswordHash())) {
+            // 允许登录
+            if (user.getLoginFailedCount() > 0) {
+                // 清空错误登录次数
+                user.setLoginFailedCount(0);
+                userRepository.save(user);
+            }
             return user;
         }
-        throw new RuntimeException("账号或密码错误");
+        // 设置错误次数+1
+        int failCount = user.getLoginFailedCount()+1;
+        user.setLoginFailedCount(failCount);
+        // 根据错误次数，设置不同的时间
+        String msg = "账号或密码错误";
+        long time = (new Date()).getTime();
+        if (failCount <= 3) {
+            // 不用管
+            time = 0;
+        } else if (failCount <= 4) {
+            // 设置为1分钟
+            time += 60 * 1000;
+            msg = "密码错误，请1分钟后再试";
+        } else if (failCount <= 5) {
+            // 设置为3分钟
+            time += 3 * 60 * 1000;
+            msg = "密码错误，请3分钟后再试";
+        } else if (failCount <= 6) {
+            // 设置为5分钟
+            time += 5 * 60 * 1000;
+            msg = "密码错误，请5分钟后再试";
+        } else if (failCount <= 7) {
+            // 设置为10分钟
+            time += 10 * 60 * 1000;
+            msg = "密码错误，请10分钟后再试";
+        } else if (failCount <= 8) {
+            // 设置为30分钟
+            time += 30 * 60 * 1000;
+            msg = "密码错误，请30分钟后再试";
+        } else if (failCount <= 9) {
+            // 设置为1小时
+            time += 60 * 60 * 1000;
+            msg = "密码错误，请1小时后再试";
+        } else if (failCount <= 10) {
+            // 设置为3小时
+            time += 3 * 60 * 60 * 1000;
+            msg = "密码错误，请3小时后再试";
+        } else if ( failCount <= 11) {
+            // 设置为6小时
+            time += 6 * 60 * 60 * 1000;
+            msg = "密码错误，请6小时后再试";
+        } else if ( failCount <= 12) {
+            // 设置为12小时
+            time += 12 * 60 * 60 * 1000;
+            msg = "密码错误，请12小时后再试";
+        } else {
+            // 设置为24小时
+            time += 24 * 60 * 60 * 1000;
+            msg = "密码错误，请24小时后再试";
+        }
+        if (time > 0) {
+            user.setLoginForbidTime(new Date(time));
+        }
+        userRepository.save(user);
+        throw new RuntimeException(msg);
     }
 
     /**
@@ -93,7 +167,7 @@ public class UserService {
         return userRepository.findByUserId(userId);
     }
 
-    public void setNickname(User user, String nickname) {
+    public void modifyNickname(User user, String nickname) {
         Date prevTime = user.getNicknameModifyTime();
         Date currTime = new Date();
         if (prevTime != null && prevTime.getTime() + ConstantValue.NICKNAME_MODIFY_INTERVAL > currTime.getTime()) {
@@ -103,5 +177,23 @@ public class UserService {
         user.setNicknameModifyTime(currTime);
         userRepository.save(user);
         return ;
+    }
+    
+    public void modifyPassword(User user, String oldPassword, String newPassword) {
+        // 判断旧密码是否正确
+        if (!bcryptPasswordEncoder().matches(oldPassword, user.getPasswordHash())) {
+            throw new RuntimeException("旧密码错误，请重试");
+        }
+        // 密码hash
+        String passwordHash = bcryptPasswordEncoder().encode(newPassword);
+        user.setPasswordHash(passwordHash);
+        userRepository.save(user);
+    }
+    
+    public void setPassword(User user, String password) {
+        // 密码hash
+        String passwordHash = bcryptPasswordEncoder().encode(password);
+        user.setPasswordHash(passwordHash);
+        userRepository.save(user);
     }
 }

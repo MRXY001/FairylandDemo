@@ -1,6 +1,8 @@
 package com.iwxyi.fairyland.Controllers;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
@@ -31,7 +33,7 @@ public class UserController {
     @Autowired
     UserService userService;
     @Autowired
-    PhoneService phoneValidationService;
+    PhoneService phoneService;
     @Autowired
     private MailService mailService;
     @Autowired
@@ -43,6 +45,7 @@ public class UserController {
 
     /**
      * 用户注册
+     * 
      * @param captcha 验证码，需要先传入手机发送，带着验证码来注册
      */
     @PostMapping(value = "/register")
@@ -50,7 +53,7 @@ public class UserController {
             @RequestParam("password") String password, @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("captcha") String captcha) {
         // 判断手机验证码
-        phoneValidationService.validateCaptcha(phoneNumber, captcha);
+        phoneService.validateCaptcha(phoneNumber, captcha);
 
         // 尝试注册
         User user = userService.register(username, password, phoneNumber);
@@ -73,7 +76,7 @@ public class UserController {
      * @param password 原密码，不是加密后的
      */
     @PostMapping(value = "/login")
-    public GlobalResponse<?> login(@RequestParam("username") String username,
+    public GlobalResponse<?> login(@RequestParam("username") @NotBlank String username,
             @RequestParam("password") String password) {
         // 判断能否登录
         User user = userService.login(username, password);
@@ -95,7 +98,7 @@ public class UserController {
      */
     @RequestMapping("/sendPhoneValidation")
     public GlobalResponse<?> sendPhoneValidation(@RequestParam("phoneNumber") String phoneNumber) {
-        phoneValidationService.sendCaptcha(phoneNumber);
+        phoneService.sendCaptcha(phoneNumber);
         return GlobalResponse.success();
     }
 
@@ -103,19 +106,28 @@ public class UserController {
      * 发送邮箱验证
      */
     @RequestMapping("/sendMailValidation")
-    @ResponseBody
     public GlobalResponse<?> sendMailValidation(@RequestParam("mail") String email) {
         mailService.sendMailValidation(email);
         return GlobalResponse.success();
     }
 
     /**
-     * 验证手机验证码，例如修改密码的时候
+     * 验证手机验证码，例如修改密码的时候。需要用户登录，不需要上传手机号
      */
-    @RequestMapping("/validPhoneCaptcha")
+    @RequestMapping("/validateUserPhoneCaptcha")
     @LoginRequired
-    public GlobalResponse<?> validPhoneCaptcha(@LoginUser User user, @RequestParam("captcha") String captcha) {
-        phoneValidationService.validateCaptcha(user.getPhoneNumber(), captcha);
+    public GlobalResponse<?> validateUserPhoneCaptcha(@LoginUser User user, @RequestParam("captcha") String captcha) {
+        phoneService.validateCaptcha(user.getPhoneNumber(), captcha);
+        return GlobalResponse.success();
+    }
+
+    /**
+     * 验证手机验证码，不需要用户登录
+     */
+    @RequestMapping("/validatePhoneCaptcha")
+    public GlobalResponse<?> validatePhoneCaptcha(@RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam("captcha") String captcha) {
+        phoneService.validateCaptcha(phoneNumber, captcha);
         return GlobalResponse.success();
     }
 
@@ -123,10 +135,29 @@ public class UserController {
      * 修改昵称
      */
     @RequestMapping("/modifyNickname")
-    @ResponseBody
     @LoginRequired
     public GlobalResponse<?> modifyNickname(@LoginUser User user, String nickname) {
-        userService.setNickname(user, nickname);
+        userService.modifyNickname(user, nickname);
+        return GlobalResponse.success();
+    }
+    
+    /**
+     * 修改密码
+     */
+    @RequestMapping("/modifyPassword")
+    @LoginRequired
+    public GlobalResponse<?> modifyPassword(@LoginUser User user, 
+            @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword) {
+        userService.modifyPassword(user, oldPassword, newPassword);
+        return GlobalResponse.success();
+    }
+    
+    @RequestMapping("/forgetPassword")
+    @LoginRequired
+    public GlobalResponse<?> forgetPassword(@LoginUser User user, @RequestParam("password") String password,
+            @RequestParam("captcha") String captcha) {
+        phoneService.validateCaptcha(user.getPhoneNumber(), captcha);
+        userService.setPassword(user, password);
         return GlobalResponse.success();
     }
 

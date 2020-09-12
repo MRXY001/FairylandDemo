@@ -27,18 +27,21 @@ public class User {
     @Id // 主键
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 表示主键由数据库生成，自增
     private Long userId;
+    @NotBlank(message = "用户名不能为空")
     @Length(min = 2, max = 16, message = "用户名长度必须在{min}~{max}之间")
     @Pattern(regexp = "^\\w[\\w\\d_]{1,15}$", message = "用户名只允许2~16位的大小写字母/数字/下划线，且要求字母开头")
     private String username;
+    @NotBlank(message = "密码不能为空")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String passwordHash;
-
+    @NotBlank(message = "昵称不能为空")
     @Length(min = 2, max = 16, message = "昵称长度必须在{min}~{max}之间")
     private String nickname;
     @NotBlank(message = "手机号码不能为空")
     @Length(min = 11, max = 11, message = "请输入正确的手机号")
     @Pattern(regexp = "^(((13[0-9])|(14[579])|(15([0-3]|[5-9]))|(16[6])|(17[0135678])|(18[0-9])|(19[89]))\\d{8})$", message = "请输入正确的手机号")
     private String phoneNumber;
+    
     @Min(0)
     @Max(100)
     private int age;
@@ -94,6 +97,8 @@ public class User {
     @Min(0)
     private int loginFailedCount; // 出错次数
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Date loginForbidTime;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date syncTime;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -108,6 +113,7 @@ public class User {
         this.username = username;
         this.passwordHash = passwordHash;
         this.phoneNumber = phoneNumber;
+        this.nickname = username;
         this.createTime = createTime;
     }
     
