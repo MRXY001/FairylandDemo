@@ -12,13 +12,13 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 /**
  * @CurrentUser 注解 解析器
  */
-public class CurrentUserIdMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public class LoginUserIdMethodArgumentResolver implements HandlerMethodArgumentResolver {
     /**
      * 表示带有 @CurrentUser 注解且为 UserId 的数据格式才进行解析
      */
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(CurrentUser.class)
+        return parameter.hasParameterAnnotation(LoginUser.class)
                 && parameter.getParameterType().isAssignableFrom(Long.class);
     }
 

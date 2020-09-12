@@ -42,12 +42,12 @@ public class InterceptorConfig extends WebMvcConfigurationSupport {
      * CurrentUser 注解参数解析器
      */
     @Bean
-    public CurrentUserMethodArgumentResolver currentUserMethodArgumentResolver() {
-        return new CurrentUserMethodArgumentResolver();
+    public LoginUserMethodArgumentResolver currentUserMethodArgumentResolver() {
+        return new LoginUserMethodArgumentResolver();
     }
 
     @Bean
-    public CurrentUserIdMethodArgumentResolver currentUserIdMethodArgumentResolver() {
-        return new CurrentUserIdMethodArgumentResolver();
+    public LoginUserIdMethodArgumentResolver currentUserIdMethodArgumentResolver() {
+        return new LoginUserIdMethodArgumentResolver();
     }
 }

@@ -93,7 +93,7 @@ public class UserService {
         return userRepository.findByUserId(userId);
     }
 
-    public boolean setNickname(User user, String nickname) {
+    public void setNickname(User user, String nickname) {
         Date prevTime = user.getNicknameModifyTime();
         Date currTime = new Date();
         if (prevTime != null && prevTime.getTime() + ConstantValue.NICKNAME_MODIFY_INTERVAL > currTime.getTime()) {
@@ -102,6 +102,6 @@ public class UserService {
         user.setNickname(nickname);
         user.setNicknameModifyTime(currTime);
         userRepository.save(user);
-        return true;
+        return ;
     }
 }

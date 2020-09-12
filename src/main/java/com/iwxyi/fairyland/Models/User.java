@@ -12,7 +12,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -30,6 +30,7 @@ public class User {
     @Length(min = 2, max = 16, message = "用户名长度必须在{min}~{max}之间")
     @Pattern(regexp = "^\\w[\\w\\d_]{1,15}$", message = "用户名只允许2~16位的大小写字母/数字/下划线，且要求字母开头")
     private String username;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String passwordHash;
 
     @Length(min = 2, max = 16, message = "昵称长度必须在{min}~{max}之间")
@@ -44,8 +45,10 @@ public class User {
     @Min(0)
     @Max(2)
     private int sex; // 0女，1男
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Pattern(regexp = "^([\\u4e00-\\u9fa5]{1,20}|[a-zA-Z\\.\\s]{1,20})$", message = "姓名格式错误")
     private String realname; // 真实姓名
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Pattern(regexp = "(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)", message = "身份证格式错误")
     private String identityCard; // 实名身份证
     @Min(0)
@@ -55,7 +58,9 @@ public class User {
     @Max(3)
     private int blocking; // 封禁：1禁言，2冻结，3封号
     @Pattern(regexp = "^\\d{5,10}$", message = "QQ号格式错误")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String qqNumber;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String wxUnionid;
     @Pattern(regexp = "^[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*@[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*\\.[a-z]{2,}$", message = "邮箱格式错误")
     private String mailAddress;
@@ -81,16 +86,22 @@ public class User {
 
     @Transient // 不存到数据库里
     private boolean vip; // 是否是VIP
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Min(0)
     private double totalPay; // 总共付了多少钱（实付）
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Min(0)
     private int loginFailedCount; // 出错次数
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date syncTime;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date createTime;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Date blockTime;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Date nicknameModifyTime;
 
     public User(String username, String passwordHash, String phoneNumber, Date createTime) {

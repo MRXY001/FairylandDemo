@@ -4,15 +4,15 @@ import java.util.Date;
 
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Models.PhoneValidation;
-import com.iwxyi.fairyland.Repositories.PhoneValidationRepository;
+import com.iwxyi.fairyland.Repositories.PhoneRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PhoneValidationService {
+public class PhoneService {
     @Autowired
-    PhoneValidationRepository phoneValidationRepository;
+    PhoneRepository phoneValidationRepository;
 
     /**
      * 发送验证码
@@ -36,7 +36,7 @@ public class PhoneValidationService {
      * @param captcha 验证码
      * @return 是否成功
      */
-    public boolean validateCaptcha(String number, String captcha) {
+    public void validateCaptcha(String number, String captcha) {
         PhoneValidation validation = phoneValidationRepository.findFirstByNumberOrderByCreateTimeDesc(number);
         if (validation == null) { // 未检测到这个号码
             throw new FormatedException("未发送" + number + "的验证码");
@@ -53,7 +53,7 @@ public class PhoneValidationService {
             // 验证成功
             validation.setVerified(); // 设置为已经使用
             phoneValidationRepository.save(validation);
-            return true;
+            return ;
         }
         // 验证失败，失败次数+1
         validation.setFailCount(validation.getFailCount() + 1);

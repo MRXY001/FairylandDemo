@@ -4,12 +4,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
-import com.iwxyi.fairyland.Interceptor.CurrentUser;
+import com.iwxyi.fairyland.Interceptor.LoginUser;
 import com.iwxyi.fairyland.Interceptor.LoginRequired;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.LoginService;
 import com.iwxyi.fairyland.Services.MailService;
-import com.iwxyi.fairyland.Services.PhoneValidationService;
+import com.iwxyi.fairyland.Services.PhoneService;
 import com.iwxyi.fairyland.Services.UserService;
 import com.iwxyi.fairyland.Tools.IpUtil;
 import com.iwxyi.fairyland.Tools.TokenUtil;
@@ -31,18 +31,19 @@ public class UserController {
     @Autowired
     UserService userService;
     @Autowired
-    PhoneValidationService phoneValidationService;
+    PhoneService phoneValidationService;
     @Autowired
     private MailService mailService;
     @Autowired
     private LoginService loginService;
     @Autowired
     private HttpServletRequest request;
-    
+
     Logger logger = LoggerFactory.getLogger(UserController.class);
 
     /**
      * 用户注册
+     * @param captcha 验证码，需要先传入手机发送，带着验证码来注册
      */
     @PostMapping(value = "/register")
     public GlobalResponse<?> register(@RequestParam("username") String username,
@@ -61,7 +62,8 @@ public class UserController {
         // 注册成功，创建token
         String token = TokenUtil.createTokenByUser(user);
 
-        return GlobalResponse.map("token", token);
+        // 返回新账号后的一些信息
+        return GlobalResponse.map("token", token, "user", user);
     }
 
     /**
@@ -84,7 +86,8 @@ public class UserController {
         // 如果之前就带有token, 会把原来的token覆盖掉
         String token = TokenUtil.createTokenByUser(user);
 
-        return GlobalResponse.map("token", token);
+        // 返回登录后的一些信息
+        return GlobalResponse.map("token", token, "user", user);
     }
 
     /**
@@ -105,14 +108,24 @@ public class UserController {
         mailService.sendMailValidation(email);
         return GlobalResponse.success();
     }
-    
+
+    /**
+     * 验证手机验证码，例如修改密码的时候
+     */
+    @RequestMapping("/validPhoneCaptcha")
+    @LoginRequired
+    public GlobalResponse<?> validPhoneCaptcha(@LoginUser User user, @RequestParam("captcha") String captcha) {
+        phoneValidationService.validateCaptcha(user.getPhoneNumber(), captcha);
+        return GlobalResponse.success();
+    }
+
     /**
      * 修改昵称
      */
     @RequestMapping("/modifyNickname")
     @ResponseBody
     @LoginRequired
-    public GlobalResponse<?> modifyNickname(@CurrentUser User user, String nickname) {
+    public GlobalResponse<?> modifyNickname(@LoginUser User user, String nickname) {
         userService.setNickname(user, nickname);
         return GlobalResponse.success();
     }
