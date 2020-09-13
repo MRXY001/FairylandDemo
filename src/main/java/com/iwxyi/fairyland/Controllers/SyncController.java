@@ -37,61 +37,68 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> startSync(@LoginUser String userId, @RequestBody List<SyncBook> localBooks) {
-
         // 获取云端的作品
         List<SyncBook> cloudBooks = syncBookService.getUserBooks(userId);
         List<SyncBook> responseBooks = new ArrayList<SyncBook>();
 
-        /*// 先匹配两者都有ID的情况，最优先
-        
-        // 再匹配本地无ID、云端有ID，可能是另一设备
-        
-        // 最后是本地新书，云端也没有的*/
-
-        // 本地和云端的一一进行匹配，排除各种稀奇百怪的状况
+        // 先匹配客户端有ID的情况，最优先
         for (int i = 0; i < localBooks.size(); i++) {
             SyncBook localBook = localBooks.get(i);
-            if (localBook.getBookIndex() == null) { // 没有ID，那么肯定还未开始同步
-                // 寻找云端是否已经有作品
-                SyncBook cloudBook = null;
-                for (int j = 0; j < cloudBooks.size(); j++) {
-                    // 判断书名是否一样
-                    if (cloudBooks.get(j).getBookName().equals(localBook.getBookName())) {
-                        cloudBook = cloudBooks.get(j);
-                        break;
-                    }
-                }
-                
-                if (cloudBook == null) { // 云端没有，需要手动上传
-                    // 创建作品
-                    localBook = syncBookService.save(localBook);
-                } else { // 云端已经有了，那么就是这一本书
-                    localBook.setBookIndex(cloudBook.getBookIndex());
-                }
-                responseBooks.add(localBook); // 添加到返回的对象
-
-            } else { // 已经同步过了（或者被用户手动破解过？）
-                boolean find = false; // 云端是否已找到
-                for (int j = 0; j < cloudBooks.size(); j++) {
-                    SyncBook cloudBook = cloudBooks.get(j);
-                    // 本地与云端匹配
-                    if (cloudBook.getBookIndex() == localBook.getBookIndex()) { // 就是这一本书
-                        find = true;
-                        
-                        // 判断这一系列的ID吧
-                        
-                    }
-                }
-                
-                if (find) { // 已经匹配对应的ID，也已经处理过了，后续就不用管了
+            if (localBook.getBookIndex() == null) {
+                continue;
+            }
+            SyncBook cloudBook = null;
+            for (int j = 0; j < cloudBooks.size(); j++) {
+                // 云端book肯定都是有ID的
+                if (cloudBooks.get(j).getBookIndex() == localBook.getBookIndex()) {
+                    // ID 一模一样，那就是这本书了！
+                    cloudBook = cloudBooks.get(j);
+                    // 可能书名不一样，另一设备客户端重命名，导致书名不一样
+                    responseBooks.add(cloudBook);
+                    localBooks.remove(i--);
+                    cloudBooks.remove(j);
                     break;
                 }
-                
-                // 本地有ID，但是云端没有，那么就有些奇怪了~
+            }
+
+            if (cloudBook == null) { // 没有找到云端的，但是客户端有ID？
+                // 不用管它，可能是其他设备已经删除云端，就当做它不存在啦
+                // 当然也有可能是用户自己随便改了个ID，这本书不是该用户的
+                localBooks.remove(i--);
             }
         }
 
-        return new GlobalResponse<>();
+        // 剩下的local都是没有ID的
+        // 再匹配客户端无ID、云端却有ID，可能是另一设备先行上传
+        for (int i = 0; i < cloudBooks.size(); i++) {
+            SyncBook cloudBook = cloudBooks.get(i);
+            SyncBook localBook = null;
+            for (int j = 0; j < localBooks.size(); j++) {
+                if (cloudBook.getBookName() == localBooks.get(j).getBookName()) {
+                    // 名字一样，就是这本书了！
+                    localBook = localBooks.get(j);
+                    cloudBooks.remove(i--);
+                    localBooks.remove(j--);
+                    break;
+                }
+            }
+            
+            if (localBook == null) {
+                // 云端有，但是客户端没有，需要在客户端进行创建
+                responseBooks.add(cloudBook);
+            }
+        }
+
+        // 最后是客户端新书，云端也没有的，创建
+        for (int i = 0; i < localBooks.size(); i++) {
+            SyncBook localBook = localBooks.get(i);
+            // 创建新书
+            SyncBook cloudBook = syncBookService.save(localBook);
+            // 返回云端创建的对象
+            responseBooks.add(cloudBook);
+        }
+
+        return GlobalResponse.map("cloudBooks", responseBooks);
     }
 
     /**
