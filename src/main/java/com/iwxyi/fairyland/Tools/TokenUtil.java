@@ -14,7 +14,7 @@ public class TokenUtil {
 
     public static String createTokenByUser(User user) {
         return JWT.create().withAudience(user.getUserId() + "")// 将 user id 保存到 token 里面
-                .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 1000))// 定义token的有效期
+                .withExpiresAt(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000))// 定义token的有效期
                 .sign(Algorithm.HMAC256(ConstantKey.USER_JWT_KEY));// 加密秘钥，也可以使用用户保持在数据库中的密码字符串
     }
 

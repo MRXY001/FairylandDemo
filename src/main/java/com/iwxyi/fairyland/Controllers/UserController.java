@@ -2,12 +2,11 @@ package com.iwxyi.fairyland.Controllers;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
-import com.iwxyi.fairyland.Interceptor.LoginUser;
 import com.iwxyi.fairyland.Interceptor.LoginRequired;
+import com.iwxyi.fairyland.Interceptor.LoginUser;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Services.LoginService;
 import com.iwxyi.fairyland.Services.MailService;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
