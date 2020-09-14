@@ -14,7 +14,7 @@ public class SyncBookService {
     SyncBookRepository syncBookRepository;
     
     public List<SyncBook> getUserBooks(String userId) {
-        return syncBookRepository.findByUserIdOrderByModifyTimeDesc(userId);
+        return syncBookRepository.getUserBooks(userId);
     }
     
     public SyncBook save(SyncBook syncBook) {
