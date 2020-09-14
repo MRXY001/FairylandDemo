@@ -14,20 +14,27 @@ import org.springframework.stereotype.Service;
 public class PhoneService {
     @Autowired
     PhoneRepository phoneRepository;
-
+    
     /**
      * 发送验证码
      * 
      * @param number 手机号（不包含区号吧）
+     * @param cpuId  调用起的唯一设备码（不一定有）
      */
-    public void sendCaptcha(String number) {
+    public void sendCaptcha(String number, String ip, String cpuId) {
         int num = (int) (Math.random() * 9000 + 1000); // 生成随机数
         String captcha = String.valueOf(num);
         Date time = new Date();
         PhoneValidation validation = new PhoneValidation(number, captcha, time);
+        if (ip != null) {
+            validation.setIp(ip); // 记录ID
+        }
+        if (cpuId != null) {
+            validation.setCpuId(cpuId);
+        }
         phoneRepository.save(validation);
 
-        // 调用API发送验证码
+        // TODO: 调用API发送验证码
     }
 
     /**

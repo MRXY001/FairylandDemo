@@ -19,6 +19,7 @@ public class LoginHistory {
     private Long loginId;
     private Long userId;
     private String ip;
+    private String cpuId;
     private String loginBy;
     private boolean success;
     private String message;

@@ -25,6 +25,8 @@ public class PhoneValidation {
     @Pattern(regexp = "^(((13[0-9])|(14[579])|(15([0-3]|[5-9]))|(16[6])|(17[0135678])|(18[0-9])|(19[89]))\\d{8})$", message = "请输入正确的手机号")
     private String number;
     private String captcha;
+    private String ip;
+    private String cpuId;
     private Date createTime;
     private int failCount;
     private boolean verified;
