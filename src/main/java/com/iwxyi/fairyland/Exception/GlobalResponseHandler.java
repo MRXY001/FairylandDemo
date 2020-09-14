@@ -71,7 +71,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
         log.error(msg);
         // log.error(Throwables.getStackTraceAsString(e));
         // return GlobalResponse.failed(Throwables.getStackTraceAsString(e), null);
-        return GlobalResponse.fail(msg, null);
+        return GlobalResponse.fail(msg);
     }
     
 

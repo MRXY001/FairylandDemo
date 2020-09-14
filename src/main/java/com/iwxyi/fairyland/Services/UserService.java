@@ -3,6 +3,7 @@ package com.iwxyi.fairyland.Services;
 import java.util.Date;
 
 import com.iwxyi.fairyland.Config.ConstantValue;
+import com.iwxyi.fairyland.Config.ErrorCode;
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Repositories.UserRepository;
@@ -31,7 +32,7 @@ public class UserService {
      */
     public User register(String username, String password, String phoneNumber) {
         if (username == null || password == null || phoneNumber == null) {
-            throw new RuntimeException("数据不能为空");
+            throw new FormatedException("数据不能为空", ErrorCode.Arg);
         }
         username = username.trim();
         password = password.trim();
@@ -39,10 +40,10 @@ public class UserService {
 
         // 判断能否注册
         if (userRepository.findByUsername(username) != null) {
-            throw new RuntimeException("用户名已存在");
+            throw new FormatedException("用户名已存在", ErrorCode.Exist);
         }
         if (userRepository.findByPhoneNumber(phoneNumber) != null) {
-            throw new RuntimeException("该手机号已注册");
+            throw new FormatedException("该手机号已注册", ErrorCode.Exist);
         }
 
         // 密码hash
@@ -67,7 +68,7 @@ public class UserService {
         // 找到要登录的用户
         User user = userRepository.findByUsernameOrPhoneNumberOrMailAddress(username, username, username);
         if (user == null) {
-            throw new RuntimeException("用户未注册");
+            throw new FormatedException("用户未注册", ErrorCode.NotExist);
         }
         // 判断是否处在登录出错冻结状态
         if (user.getLoginForbidTime() != null) {
@@ -75,6 +76,7 @@ public class UserService {
             if (delta > 0) {
                 delta /= 1000; // 转换为秒
                 String time;
+                // 时间差转换为中文
                 if (delta < 60) {
                     time = delta + "秒";
                 } else if (delta < 60 * 60) {
@@ -82,9 +84,9 @@ public class UserService {
                 } else if (delta < 60 * 60 * 30) {
                     time = delta / 60 / 60 + "小时";
                 } else {
-                    throw new FormatedException("太多次错误，建议重设密码");
+                    throw new FormatedException("太多次错误，建议重设密码", ErrorCode.Blocked);
                 }
-                throw new FormatedException("多次密码错误，请在" + time + "后再试");
+                throw new FormatedException("多次密码错误，已临时冻结，请在" + time + "后再试", ErrorCode.Blocked);
             }
         }
         
@@ -152,7 +154,7 @@ public class UserService {
             user.setLoginForbidTime(new Date(time));
         }
         userRepository.save(user);
-        throw new RuntimeException(msg);
+        throw new FormatedException(msg, ErrorCode.Incorrect);
     }
 
     /**
@@ -171,7 +173,7 @@ public class UserService {
         Date prevTime = user.getNicknameModifyTime();
         Date currTime = new Date();
         if (prevTime != null && prevTime.getTime() + ConstantValue.NICKNAME_MODIFY_INTERVAL > currTime.getTime()) {
-            throw new FormatedException("一周只能修改一次昵称");
+            throw new FormatedException("一周只能修改一次昵称", ErrorCode.FrequencyTime);
         }
         user.setNickname(nickname);
         user.setNicknameModifyTime(currTime);
@@ -182,7 +184,7 @@ public class UserService {
     public void modifyPassword(User user, String oldPassword, String newPassword) {
         // 判断旧密码是否正确
         if (!bcryptPasswordEncoder().matches(oldPassword, user.getPasswordHash())) {
-            throw new RuntimeException("旧密码错误，请重试");
+            throw new FormatedException("旧密码错误，请重试", ErrorCode.Incorrect);
         }
         // 密码hash
         String passwordHash = bcryptPasswordEncoder().encode(newPassword);

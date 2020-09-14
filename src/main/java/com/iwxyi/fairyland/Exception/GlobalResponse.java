@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.iwxyi.fairyland.Config.ErrorCode;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,14 @@ public class GlobalResponse<T> {
     public static <T> GlobalResponse<T> fail(String msg, Integer code) {
         GlobalResponse<T> resp = new GlobalResponse<T>();
         resp.setCode(code);
+        resp.setMsg(msg);
+        resp.setSuccess(false);
+        return resp;
+    }
+
+    public static <T> GlobalResponse<T> fail(String msg, ErrorCode code) {
+        GlobalResponse<T> resp = new GlobalResponse<T>();
+        resp.setCode(code.code);
         resp.setMsg(msg);
         resp.setSuccess(false);
         return resp;

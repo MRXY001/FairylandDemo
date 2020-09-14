@@ -8,6 +8,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.iwxyi.fairyland.Config.ConstantKey;
+import com.iwxyi.fairyland.Config.ErrorCode;
+import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Models.User;
 
 public class TokenUtil {
@@ -23,7 +25,7 @@ public class TokenUtil {
         try {
             jwtVerifier.verify(token);
         } catch (JWTVerificationException e) {
-            throw new RuntimeException("无效 token，请重新登录");
+            throw new FormatedException("无效 token，请重新登录", ErrorCode.Login);
         }
         return true;
     }
@@ -32,7 +34,7 @@ public class TokenUtil {
         try {
             return Long.parseLong(JWT.decode(token).getAudience().get(0));
         } catch (JWTDecodeException j) {
-            throw new RuntimeException("无效 token，请重新登录");
+            throw new FormatedException("无效 token，请重新登录", ErrorCode.Login);
         }
     }
 

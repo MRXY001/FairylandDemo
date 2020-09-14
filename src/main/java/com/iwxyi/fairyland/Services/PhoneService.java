@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.iwxyi.fairyland.Config.ConstantValue;
+import com.iwxyi.fairyland.Config.ErrorCode;
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Models.PhoneValidation;
 import com.iwxyi.fairyland.Repositories.PhoneRepository;
@@ -29,10 +30,10 @@ public class PhoneService {
             // 一分钟内有发送过得验证码
             if (!history.isVerified()) {
                 // 可能是客户端的时间没弄好？
-                throw new IllegalArgumentException("请等待验证码接收");
+                throw new FormatedException("请等待验证码接收", ErrorCode.Wait);
             } else {
                 // 想不到用户刚发送验证码并确认后居然又要改什么隐秘的东西了？
-                throw new FormatedException("短信发送过于频繁，请稍后再试");
+                throw new FormatedException("短信发送过于频繁，请稍后再试", ErrorCode.FrequencyNumber);
             }
         }
 
@@ -40,7 +41,7 @@ public class PhoneService {
         Date early1h = new Date((new Date()).getTime() - 12 * ConstantValue.PHONE_VALIDATION_VALID);
         List<PhoneValidation> historysIn1h = phoneRepository.findByNumberAndCreateTimeGreaterThan(number, early1h);
         if (historysIn1h.size() > 5) {
-            throw new FormatedException("短信发送过于频繁，请稍后再试");
+            throw new FormatedException("短信发送过于频繁，请稍后再试", ErrorCode.FrequencyNumber);
         }
 
         // number不同，但是ip或cpuId相同（难道是用我的程序来轰炸别人？）
@@ -48,14 +49,14 @@ public class PhoneService {
             List<PhoneValidation> historysOfIpIn1h = phoneRepository.findByIpAndVerifiedAndCreateTimeGreaterThan(ip,
                     false, early1h);
             if (historysOfIpIn1h.size() > 10) { // 同一局域网内是同一个IP，这个要适当放宽
-                throw new FormatedException("短信发送过于频繁，请稍后再试");
+                throw new FormatedException("短信发送过于频繁，请稍后再试", ErrorCode.FrequencyIp);
             }
         }
         if (cpuId != null) {
             List<PhoneValidation> historysOfIpIn1h = phoneRepository.findByIpAndVerifiedAndCreateTimeGreaterThan(ip,
                     false, early1h);
             if (historysOfIpIn1h.size() > 5) { // 同一局域网内是同一个IP，这个要适当放宽
-                throw new FormatedException("短信发送过于频繁，请稍后再试");
+                throw new FormatedException("短信发送过于频繁，请稍后再试", ErrorCode.FrequencyDevice);
             }
         }
 
@@ -96,16 +97,16 @@ public class PhoneService {
     public void validateCaptcha(String number, String captcha) {
         PhoneValidation validation = phoneRepository.findFirstByNumberOrderByCreateTimeDesc(number);
         if (validation == null) { // 未检测到这个号码
-            throw new FormatedException("未发送" + number + "的验证码");
+            throw new FormatedException("未发送" + number + "的验证码", ErrorCode.Invalid);
         }
         if (validation.isVerified()) { // 已经使用过的验证码
-            throw new FormatedException("请重新发送验证码");
+            throw new FormatedException("请重新发送验证码", ErrorCode.Retry);
         }
         if (validation.getFailCount() > 3) { // 多次验证失败
-            throw new FormatedException("验证次数过多，请稍后重试", 250);
+            throw new FormatedException("验证次数过多，请稍后重试", ErrorCode.Bomb);
         }
         if (validation.getCreateTime().getTime() + ConstantValue.PHONE_VALIDATION_VALID > (new Date()).getTime()) {
-            throw new FormatedException("验证码已失效，请重新发送");
+            throw new FormatedException("验证码已失效，请重新发送", ErrorCode.Overdue);
         }
 
         // 进行验证，判断是否正确
@@ -118,6 +119,6 @@ public class PhoneService {
         // 验证失败，失败次数+1
         validation.setFailCount(validation.getFailCount() + 1);
         phoneRepository.save(validation);
-        throw new FormatedException("请输入正确的验证码");
+        throw new FormatedException("请输入正确的验证码", ErrorCode.Incorrect);
     }
 }

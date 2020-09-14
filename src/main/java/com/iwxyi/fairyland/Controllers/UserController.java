@@ -3,6 +3,7 @@ package com.iwxyi.fairyland.Controllers;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
 
+import com.iwxyi.fairyland.Config.ErrorCode;
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
 import com.iwxyi.fairyland.Interceptor.LoginRequired;
@@ -173,7 +174,7 @@ public class UserController {
      */
     @RequestMapping("/test")
     public void test() {
-        throw new FormatedException("恭喜您，成功找到了测试入口~", 5001);
+        throw new FormatedException("恭喜您，成功找到了测试入口~", ErrorCode.Test);
     }
 
 }
