@@ -1,13 +1,10 @@
 package com.iwxyi.fairyland.Repositories;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import com.iwxyi.fairyland.Models.SyncChapter;
 
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 public interface SyncChapterRepository extends CrudRepository<SyncChapter, Long> {
     SyncChapter findByChapterIndex(Long chapterIndex);
@@ -24,6 +21,6 @@ public interface SyncChapterRepository extends CrudRepository<SyncChapter, Long>
         
     List<SyncChapter> findByUserId(Long userId);
     
-    List<SyncChapter> findByUserIdAndDeletedNotAndModifyTimeGreaterThan(Long userId, int notDeleted, Timestamp time);
+    List<SyncChapter> findByUserIdAndDeletedNotAndModifyTimeGreaterThan(Long userId, boolean notDeleted, long time);
     
 }

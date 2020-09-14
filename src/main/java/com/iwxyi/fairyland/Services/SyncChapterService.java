@@ -1,6 +1,5 @@
 package com.iwxyi.fairyland.Services;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import com.iwxyi.fairyland.Config.ErrorCode;
@@ -21,9 +20,9 @@ public class SyncChapterService {
         return chapterRepository.findByUserId(userId);
     }
 
-    public List<SyncChapter> getUserUpdatedChapters(Long userId, Timestamp timestamp) {
+    public List<SyncChapter> getUserUpdatedChapters(Long userId, long timestamp) {
         // return chapterRepository.getUserUpdatedChapters(userId, timestamp);
-        return chapterRepository.findByUserIdAndDeletedNotAndModifyTimeGreaterThan(userId, 1, timestamp);
+        return chapterRepository.findByUserIdAndDeletedNotAndModifyTimeGreaterThan(userId, true, timestamp);
     }
     
     public SyncChapter getChapter(Long chapterIndex, Long bookIndex, Long userId) {

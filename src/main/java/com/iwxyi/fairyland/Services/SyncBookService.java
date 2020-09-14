@@ -1,6 +1,5 @@
 package com.iwxyi.fairyland.Services;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import com.iwxyi.fairyland.Config.ErrorCode;
@@ -18,12 +17,12 @@ public class SyncBookService {
 
     public List<SyncBook> getUserBooks(Long userId) {
         // return bookRepository.getUserBooks(userId);
-        return bookRepository.findByUserIdAndDeletedNot(userId, 1);
+        return bookRepository.findByUserIdAndDeletedNot(userId, true);
     }
 
-    public List<SyncBook> getUserUpdatedBooks(Long userId, Timestamp time) {
+    public List<SyncBook> getUserUpdatedBooks(Long userId, long time) {
         // return bookRepository.getUserUpdatedBooks(userId, time);
-        return bookRepository.findByUserIdAndDeletedNotAndModifyTimeGreaterThan(userId, 1, time);
+        return bookRepository.findByUserIdAndDeletedNotAndModifyTimeGreaterThan(userId, true, time);
     }
 
     public SyncBook save(SyncBook syncBook) {

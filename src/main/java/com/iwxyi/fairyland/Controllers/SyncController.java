@@ -1,8 +1,6 @@
 package com.iwxyi.fairyland.Controllers;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.iwxyi.fairyland.Exception.GlobalResponse;
@@ -48,7 +46,7 @@ public class SyncController {
         // 获取云端的作品
         List<SyncBook> cloudBooks = bookService.getUserBooks(userId);
         List<SyncBook> responseBooks = new ArrayList<SyncBook>();
-
+        
         // #先匹配客户端有ID的情况，最优先
         for (int i = 0; i < localBooks.size(); i++) {
             SyncBook localBook = localBooks.get(i);
@@ -102,8 +100,9 @@ public class SyncController {
         for (int i = 0; i < localBooks.size(); i++) {
             SyncBook localBook = localBooks.get(i);
             // *创建云端新书
-            localBook.setModifyTime(new Date(0));
-            localBook.setUploadTime(new Date(0));
+            localBook.setModifyTime(0L);
+            localBook.setUploadTime(0L);
+            localBook.setUserId(userId);
             SyncBook cloudBook = bookService.save(localBook);
             // 返回云端创建的对象
             responseBooks.add(cloudBook);
@@ -124,7 +123,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> downloadUpdatedBooks(@LoginUser Long userId,
-            @RequestParam("syncTime") final Timestamp syncTime) {
+            @RequestParam("syncTime") final long syncTime) {
 
         // #返回有更新的目录列表索引
         List<SyncBook> syncBooks = bookService.getUserUpdatedBooks(userId, syncTime);
@@ -144,7 +143,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> downloadUpdatedChapters(@LoginUser Long userId,
-            @RequestParam("syncTime") final Timestamp syncTime) {
+            @RequestParam("syncTime") final long syncTime) {
 
         // #返回有更新的章节列表
         List<SyncChapter> syncChapters = chapterService.getUserUpdatedChapters(userId, syncTime);
@@ -170,6 +169,7 @@ public class SyncController {
 
     /**
      * #云同步第五步：上传作品章节或相关数据
+     * *需要先存在作品实体（如果有正确的chapterIndex的话应当存在）
      * 
      * @param chapterType 章节种类，0章节，1大纲，其他以后再加(其实除了要用的章节，其余和后端关系不大)
      */
@@ -180,7 +180,7 @@ public class SyncController {
             @RequestParam("bookIndex") final Long bookIndex,
             @RequestParam(value = "chapterIndex", required = false) final Long chapterIndex,
             @RequestParam("title") String title, @RequestParam("content") final String content,
-            @RequestParam("chapterType") final int chapterType, @RequestParam("modifyTime") Timestamp modifyTime) {
+            @RequestParam("chapterType") final int chapterType, @RequestParam("modifyTime") long modifyTime) {
 
         SyncChapter chapter;
         if (chapterIndex == null || chapterIndex <= 0) {
@@ -188,7 +188,7 @@ public class SyncController {
         } else {
             chapter = chapterService.getChapter(chapterIndex, bookIndex, userId);
         }
-        chapter.setModifyTime(new Date(modifyTime.getTime()));
+        chapter.setModifyTime(modifyTime);
         chapterService.save(chapter);
 
         return GlobalResponse.map("chapterIndex", chapter.getChapterIndex());

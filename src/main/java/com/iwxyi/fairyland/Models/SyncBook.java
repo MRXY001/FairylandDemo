@@ -1,7 +1,5 @@
 package com.iwxyi.fairyland.Models;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,10 +24,10 @@ public class SyncBook {
     private String bookName;
     private String catalog; // 目录正文
     private int publicState; // 0不发布，1仅为好友可见，2全部公开
-    private Date createTime;
-    private Date uploadTime = new Date(0);
-    private Date modifyTime = new Date(0);
+    private long createTime;
+    private long uploadTime = 0L;
+    private long modifyTime = 0L;
     private int publishState;
-    private Boolean deleted;
+    private boolean deleted;
 
 }

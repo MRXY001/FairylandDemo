@@ -1,7 +1,5 @@
 package com.iwxyi.fairyland.Models;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -25,11 +23,11 @@ public class SyncChapter {
     @Length(min = 1, max = 20, message = "章节名不能超过20个字")
     private String title;
     private String content;
-    private Date createTime = new Date(0);
-    private Date uploadTime = new Date(0);
-    private Date modifyTime = new Date(0);
+    private long createTime = 0L;
+    private long uploadTime = 0L;
+    private long modifyTime = 0L;
     private int publishState;
-    private Boolean deleted;
+    private boolean deleted;
 
     public SyncChapter(Long bookIndex, Long userId, String title, String content) {
         this.bookIndex = bookIndex;
