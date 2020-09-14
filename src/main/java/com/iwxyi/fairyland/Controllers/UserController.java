@@ -50,7 +50,7 @@ public class UserController {
     @PostMapping(value = "/register")
     public GlobalResponse<?> register(@RequestParam("username") String username,
             @RequestParam("password") String password, @RequestParam("phoneNumber") String phoneNumber,
-            @RequestParam("captcha") String captcha, @RequestParam("cpuId") String cpuId) {
+            @RequestParam("captcha") String captcha, @RequestParam(value = "cpuId", required = false) String cpuId) {
         // 判断手机验证码
         phoneService.validateCaptcha(phoneNumber, captcha);
 
@@ -75,7 +75,7 @@ public class UserController {
      */
     @PostMapping(value = "/login")
     public GlobalResponse<?> login(@RequestParam("username") @NotBlank String username,
-            @RequestParam("password") String password, @RequestParam("cpuId") String cpuId) {
+            @RequestParam("password") String password, @RequestParam(value = "cpuId", required = false) String cpuId) {
         // 判断能否登录
         User user = userService.login(username, password);
 

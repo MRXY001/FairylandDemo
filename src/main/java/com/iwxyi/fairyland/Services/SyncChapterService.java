@@ -17,11 +17,13 @@ public class SyncChapterService {
     SyncChapterRepository chapterRepository;
 
     public List<SyncChapter> getUserChapters(Long userId) {
-        return chapterRepository.getUserChapters(userId);
+        // return chapterRepository.getUserChapters(userId);
+        return chapterRepository.findByUserId(userId);
     }
 
     public List<SyncChapter> getUserUpdatedChapters(Long userId, Timestamp timestamp) {
-        return chapterRepository.getUserUpdatedChapters(userId, timestamp);
+        // return chapterRepository.getUserUpdatedChapters(userId, timestamp);
+        return chapterRepository.findByUserIdAndDeletedNotAndModifyTimeGreaterThan(userId, 1, timestamp);
     }
     
     public SyncChapter getChapter(Long chapterIndex, Long bookIndex, Long userId) {

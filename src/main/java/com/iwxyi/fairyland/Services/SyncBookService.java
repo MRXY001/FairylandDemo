@@ -15,15 +15,17 @@ import org.springframework.stereotype.Service;
 public class SyncBookService {
     @Autowired
     SyncBookRepository bookRepository;
-    
+
     public List<SyncBook> getUserBooks(Long userId) {
-        return bookRepository.getUserBooks(userId);
+        // return bookRepository.getUserBooks(userId);
+        return bookRepository.findByUserIdAndDeletedNot(userId, 1);
     }
-    
+
     public List<SyncBook> getUserUpdatedBooks(Long userId, Timestamp time) {
-        return bookRepository.getUserUpdatedBooks(userId, time);
+        // return bookRepository.getUserUpdatedBooks(userId, time);
+        return bookRepository.findByUserIdAndDeletedNotAndModifyTimeGreaterThan(userId, 1, time);
     }
-    
+
     public SyncBook save(SyncBook syncBook) {
         return bookRepository.save(syncBook);
     }
@@ -37,5 +39,5 @@ public class SyncBookService {
         }
         return book;
     }
-    
+
 }

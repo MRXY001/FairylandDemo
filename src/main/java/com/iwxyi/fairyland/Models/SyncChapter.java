@@ -21,7 +21,7 @@ public class SyncChapter {
     private Long chapterIndex;
     private Long bookIndex;
     private Long userId;
-    private String chapterId;
+    private String chapterId; // 这个是作品内章节唯一ID
     @Length(min = 1, max = 20, message = "章节名不能超过20个字")
     private String title;
     private String content;
@@ -29,7 +29,7 @@ public class SyncChapter {
     private Date uploadTime = new Date(0);
     private Date modifyTime = new Date(0);
     private int publishState;
-    private boolean deleted;
+    private Boolean deleted;
 
     public SyncChapter(Long bookIndex, Long userId, String title, String content) {
         this.bookIndex = bookIndex;

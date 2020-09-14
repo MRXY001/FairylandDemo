@@ -30,6 +30,6 @@ public class SyncBook {
     private Date uploadTime = new Date(0);
     private Date modifyTime = new Date(0);
     private int publishState;
-    private boolean deleted;
+    private Boolean deleted;
 
 }

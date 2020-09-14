@@ -105,7 +105,7 @@ public class PhoneService {
         if (validation.getFailCount() > 3) { // 多次验证失败
             throw new FormatedException("验证次数过多，请稍后重试", ErrorCode.Bomb);
         }
-        if (validation.getCreateTime().getTime() + ConstantValue.PHONE_VALIDATION_VALID > (new Date()).getTime()) {
+        if (validation.getCreateTime().getTime() + ConstantValue.PHONE_VALIDATION_VALID < (new Date()).getTime()) {
             throw new FormatedException("验证码已失效，请重新发送", ErrorCode.Overdue);
         }
 
