@@ -97,17 +97,17 @@ public class User {
     @Min(0)
     private int loginFailedCount; // 出错次数
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Date loginForbidTime;
+    private Date loginForbidTime = new Date(0);
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date syncTime;
+    private Date syncTime = new Date(0);
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date createTime;
+    private Date createTime = new Date(0);
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Date blockTime;
+    private Date blockTime = new Date(0);
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Date nicknameModifyTime;
+    private Date nicknameModifyTime = new Date(0);
 
     public User(String username, String passwordHash, String phoneNumber, Date createTime) {
         this.username = username;

@@ -21,7 +21,7 @@ public class LoginHistory {
     private String ip;
     private String cpuId;
     private String loginBy;
-    private boolean success;
+    private boolean success = true;
     private String message;
     private Date time;
 }

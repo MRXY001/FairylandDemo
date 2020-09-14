@@ -19,16 +19,22 @@ public class SyncChapter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long chapterIndex;
-    private Long bookId;
+    private Long bookIndex;
     private Long userId;
     private String chapterId;
     @Length(min = 1, max = 20, message = "章节名不能超过20个字")
     private String title;
     private String content;
-    private Date createTime;
-    private Date uploadTime;
-    private Date modifyTime;
+    private Date createTime = new Date(0);
+    private Date uploadTime = new Date(0);
+    private Date modifyTime = new Date(0);
     private int publishState;
     private boolean deleted;
 
+    public SyncChapter(Long bookIndex, Long userId, String title, String content) {
+        this.bookIndex = bookIndex;
+        this.userId = userId;
+        this.title = title;
+        this.content = content;
+    }
 }
