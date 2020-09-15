@@ -13,6 +13,6 @@ public interface UserRepository extends CrudRepository<User, Long> {
     
     User findByNickname(String nickname);
     
-    User findByUsernameOrPhoneNumberOrMailAddress(String username, String phoneNumber, String mailAddress);
+    User findByUsernameOrPhoneNumberOrEmailAddress(String username, String phoneNumber, String emailAddress);
 
 }

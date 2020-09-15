@@ -66,7 +66,7 @@ public class UserService {
      */
     public User login(String username, String password) {
         // 找到要登录的用户
-        User user = userRepository.findByUsernameOrPhoneNumberOrMailAddress(username, username, username);
+        User user = userRepository.findByUsernameOrPhoneNumberOrEmailAddress(username, username, username);
         if (user == null) {
             throw new FormatedException("用户未注册", ErrorCode.NotExist);
         }

@@ -42,9 +42,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> startSync(@LoginUser Long userId, @RequestBody List<SyncBook> localBooks) {
-
         List<SyncBook> responseBooks = bookService.syncLocalAndCloudBooks(userId, localBooks);
-
         // 返回云端的作品的情况（此时该新建的已经新建，数量是：云端>=客户端）
         return GlobalResponse.map("cloudBooks", responseBooks);
     }
@@ -62,10 +60,8 @@ public class SyncController {
     @LoginRequired
     public GlobalResponse<?> downloadUpdatedBooks(@LoginUser Long userId,
             @RequestParam("syncTime") final long syncTime) {
-
         // #返回有更新的目录列表索引
         List<SyncBook> syncBooks = bookService.getUserUpdatedBooks(userId, syncTime);
-
         return GlobalResponse.map("books", syncBooks);
     }
 
@@ -83,10 +79,8 @@ public class SyncController {
     @LoginRequired
     public GlobalResponse<?> downloadUpdatedChapters(@LoginUser Long userId,
             @RequestParam("syncTime") final long syncTime) {
-
         // #返回有更新的章节列表
         List<SyncChapter> syncChapters = chapterService.getUserUpdatedChapters(userId, syncTime);
-
         return GlobalResponse.map("chapters", syncChapters);
     }
 
@@ -100,10 +94,8 @@ public class SyncController {
     @LoginRequired
     public GlobalResponse<?> downloadBookUpdatedChapters(@LoginUser Long userId,
             @RequestParam("bookIndex") Long bookIndex, @RequestParam("syncTime") final Long syncTime) {
-
         // #获取这本作品有更新的章节列表
         List<SyncChapter> syncChapters = chapterService.getBookUpdatedChapters(userId, bookIndex, syncTime);
-
         return GlobalResponse.map("bookIndex", bookIndex, "chapters", syncChapters);
     }
 
@@ -117,9 +109,7 @@ public class SyncController {
     public GlobalResponse<?> uploadBookCatalog(@LoginUser Long userId, @RequestParam("bookIndex") final Long bookIndex,
             @RequestParam("name") String name, @RequestParam("catalog") final String catalog,
             @RequestParam("modifyTime") long modifyTime) {
-
         SyncBook book = bookService.uploadBookCatalog(userId, bookIndex, name, catalog, modifyTime);
-
         return GlobalResponse.map("book", book);
     }
 
@@ -137,10 +127,8 @@ public class SyncController {
             @RequestParam("title") final String title, @RequestParam("content") final String content,
             @RequestParam(value = "chapterType", required = false) final int chapterType,
             @RequestParam("modifyTime") long modifyTime) {
-
         SyncChapter chapter = chapterService.uploadChapter(userId, bookIndex, chapterId, title, content, chapterType,
                 modifyTime);
-
         return GlobalResponse.map("chapterIndex", chapter.getChapterIndex());
     }
 
@@ -153,9 +141,7 @@ public class SyncController {
     @LoginRequired
     public GlobalResponse<?> renameBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
             @RequestParam("newName") String newName) {
-
         bookService.renameBook(userId, bookIndex, newName);
-
         return GlobalResponse.success();
     }
 
@@ -168,9 +154,7 @@ public class SyncController {
     @LoginRequired
     public GlobalResponse<?> renameChapter(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
             @RequestParam("chapterId") String chapterId, @RequestParam("newName") String newName) {
-
         chapterService.renameChapter(userId, bookIndex, chapterId, newName);
-
         return GlobalResponse.success();
     }
 
@@ -182,9 +166,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> deleteBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
-
         bookService.deleteBook(bookIndex, userId);
-
         return GlobalResponse.success();
     }
 
@@ -193,9 +175,7 @@ public class SyncController {
     @LoginRequired
     public GlobalResponse<?> deleteChapter(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
             @RequestParam("chapterId") String chapterId) {
-
         chapterService.deleteChapter(userId, bookIndex, chapterId);
-
         return GlobalResponse.success();
     }
 
@@ -203,9 +183,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> restoreBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
-
         bookService.restoreBook(bookIndex, userId);
-
         return GlobalResponse.success();
     }
 
@@ -214,9 +192,7 @@ public class SyncController {
     @LoginRequired
     public GlobalResponse<?> restoreChapter(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
             @RequestParam("chapterId") String chapterId) {
-
         chapterService.restoreChapter(userId, bookIndex, chapterId);
-
         return GlobalResponse.success();
     }
 
@@ -229,9 +205,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> cleanRecycle(@LoginUser Long userId) {
-
         bookService.cleanRecycle(userId);
-
         return GlobalResponse.success();
     }
 
@@ -243,9 +217,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> cleanBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
-
         bookService.cleanBook(bookIndex, userId);
-
         return GlobalResponse.success();
     }
 }

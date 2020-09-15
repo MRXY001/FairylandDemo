@@ -66,7 +66,7 @@ public class User {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String wxUnionid;
     @Pattern(regexp = "^[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*@[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*\\.[a-z]{2,}$", message = "邮箱格式错误")
-    private String mailAddress;
+    private String emailAddress;
     @Length(min = 0, max = 20, message = "签名长度不能超过20字")
     private String motto;
     @Pattern(regexp = "(http|ftp|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?", message = "个人主页配置出错")
