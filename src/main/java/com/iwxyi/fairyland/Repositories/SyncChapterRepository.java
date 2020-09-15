@@ -17,10 +17,10 @@ public interface SyncChapterRepository extends CrudRepository<SyncChapter, Long>
 
     SyncChapter findFirstByUserIdAndBookIndexAndChapterId(Long userId, Long bookIndex, String chapterId);
 
-    List<SyncChapter> findByUserIdAndDeletedNotAndBookDeletedNotModifyTimeGreaterThan(Long userId, boolean notDeleted,
+    List<SyncChapter> findByUserIdAndDeletedAndBookDeletedAndModifyTimeGreaterThan(Long userId, boolean notDeleted,
             boolean bookExist, long time);
 
-    List<SyncChapter> findByUserIdAndBookIndexAndDeletedNotAndBookDeletedNotModifyTimeGreaterThan(Long userId,
+    List<SyncChapter> findByUserIdAndBookIndexAndDeletedAndBookDeletedAndModifyTimeGreaterThan(Long userId,
             Long bookIndex, boolean notDeleted, boolean bookExist, long time);
 
     @Transactional // 事务
@@ -34,6 +34,8 @@ public interface SyncChapterRepository extends CrudRepository<SyncChapter, Long>
     int restoreBookChapter(Long bookIndex);
 
     void deleteByUserIdAndDeleted(Long userId, boolean deleted);
+
+    void deleteByUserIdAndBookDeleted(Long userId, boolean deleted);
 
     void deleteByBookIndex(Long bookIndex);
 }

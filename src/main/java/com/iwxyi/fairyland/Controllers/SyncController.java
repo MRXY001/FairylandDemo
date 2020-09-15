@@ -52,7 +52,7 @@ public class SyncController {
      * 不包含章节、名片等正文片段类的小数据
      * !查询后全部返回，仅仅目录，数据不会特别大
      * 
-     * @param syncTime 设备上次拉取的时间戳。如果为0的话表示全部下载
+     * @param syncTime 设备上次拉取的时间戳。如果为0的话表示全部下载（仅限有效作品，刚创建也是0，没必要算）
      * @return 待下载的内容
      */
     @PostMapping(value = "/downloadUpdatedBooks")
@@ -110,7 +110,7 @@ public class SyncController {
             @RequestParam("name") String name, @RequestParam("catalog") final String catalog,
             @RequestParam("modifyTime") long modifyTime) {
         SyncBook book = bookService.uploadBookCatalog(userId, bookIndex, name, catalog, modifyTime);
-        return GlobalResponse.map("book", book);
+        return GlobalResponse.map("bookIndex", book.getBookIndex());
     }
 
     /**
@@ -123,7 +123,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> uploadChapterContent(@LoginUser Long userId,
-            @RequestParam("bookIndex") final Long bookIndex, @RequestParam("chaterId") final String chapterId,
+            @RequestParam("bookIndex") final Long bookIndex, @RequestParam("chapterId") final String chapterId,
             @RequestParam("title") final String title, @RequestParam("content") final String content,
             @RequestParam(value = "chapterType", required = false) final int chapterType,
             @RequestParam("modifyTime") long modifyTime) {
@@ -166,7 +166,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> deleteBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
-        bookService.deleteBook(bookIndex, userId);
+        bookService.deleteBook(userId, bookIndex);
         return GlobalResponse.success();
     }
 
@@ -183,7 +183,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> restoreBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
-        bookService.restoreBook(bookIndex, userId);
+        bookService.restoreBook(userId, bookIndex);
         return GlobalResponse.success();
     }
 
@@ -213,11 +213,11 @@ public class SyncController {
      * !彻底删除某一部作品，无法恢复
      * 无论该作品状态如何，都会清空掉
      */
-    @PostMapping(value = "/cleanRecycle")
+    @PostMapping(value = "/cleanBook")
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> cleanBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
-        bookService.cleanBook(bookIndex, userId);
+        bookService.cleanBook(userId, bookIndex);
         return GlobalResponse.success();
     }
 }

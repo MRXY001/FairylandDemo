@@ -20,11 +20,11 @@ public class SyncChapterService {
     }
 
     public List<SyncChapter> getUserUpdatedChapters(Long userId, long timestamp) {
-        return chapterRepository.findByUserIdAndDeletedNotAndBookDeletedNotModifyTimeGreaterThan(userId, true, true, timestamp);
+        return chapterRepository.findByUserIdAndDeletedAndBookDeletedAndModifyTimeGreaterThan(userId, false, false, timestamp);
     }
     
     public List<SyncChapter> getBookUpdatedChapters(Long userId, Long bookIndex, long timestamp) {
-        return chapterRepository.findByUserIdAndBookIndexAndDeletedNotAndBookDeletedNotModifyTimeGreaterThan(userId, bookIndex, true, true, timestamp);
+        return chapterRepository.findByUserIdAndBookIndexAndDeletedAndBookDeletedAndModifyTimeGreaterThan(userId, bookIndex, false, false, timestamp);
     }
     
     public SyncChapter getChapterByChapterIndex(Long chapterIndex, Long bookIndex, Long userId) {

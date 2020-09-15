@@ -20,11 +20,11 @@ public class SyncBookService {
     SyncChapterRepository chapterRepository;
 
     public List<SyncBook> getUserBooks(Long userId) {
-        return bookRepository.findByUserIdAndDeletedNot(userId, true);
+        return bookRepository.findByUserIdAndDeleted(userId, false);
     }
 
     public List<SyncBook> getUserUpdatedBooks(Long userId, long time) {
-        return bookRepository.findByUserIdAndDeletedNotAndModifyTimeGreaterThan(userId, true, time);
+        return bookRepository.findByUserIdAndDeletedAndModifyTimeGreaterThan(userId, false, time);
     }
 
     private SyncBook getBook(Long userId, Long bookIndex) {
@@ -75,14 +75,16 @@ public class SyncBookService {
         }
 
         // (剩下的local都是没有ID的)
-        // #再匹配客户端无书、云端却有，可能是另一设备先行上传
+        // #再匹配同名作品，客户端无ID、云端却有，可能是另一设备先行上传
         for (int i = 0; i < cloudBooks.size(); i++) {
             SyncBook cloudBook = cloudBooks.get(i);
             SyncBook localBook = null;
             for (int j = 0; j < localBooks.size(); j++) {
-                if (cloudBook.getBookName() == localBooks.get(j).getBookName()) {
+                if (cloudBook.getBookName().equals(localBooks.get(j).getBookName())) {
                     // 名字一样，就是这本书了！
                     localBook = localBooks.get(j);
+                    // *需要在客户端设置bookIndex
+                    responseBooks.add(cloudBook);
                     cloudBooks.remove(i--);
                     localBooks.remove(j--);
                     break;
@@ -133,7 +135,7 @@ public class SyncBookService {
         return book;
     }
 
-    public void renameBook(Long bookIndex, Long userId, String newName) {
+    public void renameBook(Long userId, Long bookIndex, String newName) {
         SyncBook book = bookRepository.findByBookIndex(bookIndex);
         if (book == null) {
             throw new FormatedException("作品不存在", ErrorCode.NotExist);
@@ -145,7 +147,7 @@ public class SyncBookService {
         bookRepository.save(book);
     }
 
-    public void deleteBook(Long bookIndex, Long userId) {
+    public void deleteBook(Long userId, Long bookIndex) {
         SyncBook book = bookRepository.findByBookIndex(bookIndex);
         if (book == null) {
             throw new FormatedException("作品不存在", ErrorCode.NotExist);
@@ -160,7 +162,7 @@ public class SyncBookService {
         chapterRepository.deleteBookChapter(bookIndex);
     }
 
-    public void restoreBook(Long bookIndex, Long userId) {
+    public void restoreBook(Long userId, Long bookIndex) {
         SyncBook book = bookRepository.findByBookIndex(bookIndex);
         if (book == null) {
             throw new FormatedException("作品不存在", ErrorCode.NotExist);
@@ -181,12 +183,13 @@ public class SyncBookService {
     public void cleanRecycle(Long userId) {
         bookRepository.deleteByUserIdAndDeleted(userId, true);
         chapterRepository.deleteByUserIdAndDeleted(userId, true);
+        chapterRepository.deleteByUserIdAndBookDeleted(userId, true);
     }
 
     /**
      * !彻底删除某一部作品
      */
-    public void cleanBook(Long bookIndex, Long userId) {
+    public void cleanBook(Long userId, Long bookIndex) {
         SyncBook book = bookRepository.findByBookIndex(bookIndex);
         if (book.getUserId() != userId) {
             throw new FormatedException("无法操作非自己的作品", ErrorCode.User);
