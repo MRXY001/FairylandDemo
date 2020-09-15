@@ -198,6 +198,9 @@ public class SyncController {
      * 重命名作品
      * *主键外键索引，和名字无关，所以只需要修改book表中的名字即可
      */
+    @PostMapping(value = "/renameBook")
+    @ResponseBody
+    @LoginRequired
     public GlobalResponse<?> renameBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
             @RequestParam("newName") String newName) {
 
@@ -210,6 +213,9 @@ public class SyncController {
      * 重命名章节
      * *这里改的是title，而不是chapterIndex(全部)或者chapterId(book内)
      */
+    @PostMapping(value = "/renameChapter")
+    @ResponseBody
+    @LoginRequired
     public GlobalResponse<?> renameChapter(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
             @RequestParam("chapterIndex") Long chapterIndex, @RequestParam("newName") String newName) {
 
@@ -222,6 +228,9 @@ public class SyncController {
      * 删除作品
      * 删除时会把所有相关的数据都删除掉，比如章节等
      */
+    @PostMapping(value = "/deleteBook")
+    @ResponseBody
+    @LoginRequired
     public GlobalResponse<?> deleteBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
 
         bookService.deleteBook(bookIndex, userId);
@@ -229,6 +238,9 @@ public class SyncController {
         return GlobalResponse.success();
     }
 
+    @PostMapping(value = "/deleteChapter")
+    @ResponseBody
+    @LoginRequired
     public GlobalResponse<?> deleteChapter(@LoginUser Long userId, @RequestParam("chapterIndex") Long chapterIndex) {
 
         chapterService.deleteChapter(chapterIndex, userId);
@@ -236,6 +248,9 @@ public class SyncController {
         return GlobalResponse.success();
     }
     
+    @PostMapping(value = "/restoreBook")
+    @ResponseBody
+    @LoginRequired
     public GlobalResponse<?> restoreBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
 
         bookService.restoreBook(bookIndex, userId);
@@ -243,10 +258,23 @@ public class SyncController {
         return GlobalResponse.success();
     }
 
+    @PostMapping(value = "/restoreChapter")
+    @ResponseBody
+    @LoginRequired
     public GlobalResponse<?> restoreChapter(@LoginUser Long userId, @RequestParam("chapterIndex") Long chapterIndex) {
 
         chapterService.restoreChapter(chapterIndex, userId);
 
+        return GlobalResponse.success();
+    }
+    
+    @PostMapping(value = "/cleanRecycle")
+    @ResponseBody
+    @LoginRequired
+    public GlobalResponse<?> cleanRecycle() {
+        
+        
+        
         return GlobalResponse.success();
     }
 }

@@ -16,4 +16,8 @@ public interface SyncBookRepository extends CrudRepository<SyncBook, Long> {
     List<SyncBook> findByUserIdAndDeletedNot(Long userId, boolean notDeleted);
 
     List<SyncBook> findByUserIdAndDeletedNotAndModifyTimeGreaterThan(Long userId, boolean notDeleted, long earlyTime);
+
+    void deleteByUserIdAndDeleted(Long userId, boolean deleted);
+    
+    void deleteByBookIndex(Long bookIndex);
 }

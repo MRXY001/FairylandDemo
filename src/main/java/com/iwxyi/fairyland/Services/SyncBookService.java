@@ -83,4 +83,24 @@ public class SyncBookService {
         // 删除这本书的所有章节
         chapterRepository.restoreBookChapter(bookIndex);
     }
+    
+    /**
+     * !清空作品回收站，所有已删除的都将无法找回
+     */
+    public void cleanRecycle(Long userId) {
+        bookRepository.deleteByUserIdAndDeleted(userId, true);
+        chapterRepository.deleteByUserIdAndDeleted(userId, true);
+    }
+    
+    /**
+     * !彻底删除某一部作品
+     */
+    public void cleanBook(Long bookIndex, Long userId) {
+        SyncBook book = bookRepository.findByBookIndex(bookIndex);
+        if (book.getUserId() != userId) {
+            throw new FormatedException("无法操作非自己的作品", ErrorCode.User);
+        }
+        bookRepository.deleteByBookIndex(bookIndex);
+        chapterRepository.deleteByBookIndex(bookIndex);
+    }
 }
