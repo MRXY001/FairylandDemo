@@ -1,5 +1,6 @@
 package com.iwxyi.fairyland.Services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.iwxyi.fairyland.Config.ErrorCode;
@@ -26,11 +27,7 @@ public class SyncBookService {
         return bookRepository.findByUserIdAndDeletedNotAndModifyTimeGreaterThan(userId, true, time);
     }
 
-    public SyncBook save(SyncBook syncBook) {
-        return bookRepository.save(syncBook);
-    }
-
-    public SyncBook getBook(Long bookIndex, Long userId) {
+    private SyncBook getBook(Long userId, Long bookIndex) {
         SyncBook book = bookRepository.findByBookIndex(bookIndex);
         if (book == null || book.getUserId() != userId) {
             // ?这本书不是这个用户的？可能是用户好奇手动改的ID
@@ -40,6 +37,102 @@ public class SyncBookService {
         return book;
     }
     
+    /**
+     * 本地数据和云端的数据进行匹配
+     * *该新建的新建，该重命名的重命名，改设置ID的设置ID
+     */
+    public List<SyncBook> syncLocalAndCloudBooks(Long userId, List<SyncBook> localBooks) {
+        // 获取云端的作品
+        List<SyncBook> cloudBooks = getUserBooks(userId);
+        List<SyncBook> responseBooks = new ArrayList<SyncBook>();
+
+        // #先匹配客户端有ID的情况，最优先
+        for (int i = 0; i < localBooks.size(); i++) {
+            SyncBook localBook = localBooks.get(i);
+            if (localBook.getBookIndex() == null) {
+                continue;
+            }
+            SyncBook cloudBook = null;
+            for (int j = 0; j < cloudBooks.size(); j++) {
+                // 云端book肯定都是有ID的
+                if (cloudBooks.get(j).getBookIndex() == localBook.getBookIndex()) {
+                    // ID 一模一样，那就是这本书了！
+                    cloudBook = cloudBooks.get(j);
+                    // ?可能书名不一样，另一设备客户端重命名，导致书名不一样
+                    // *客户端需要额外判断ID的情况，有必要时进行重命名
+                    responseBooks.add(cloudBook);
+                    localBooks.remove(i--);
+                    cloudBooks.remove(j);
+                    break;
+                }
+            }
+
+            if (cloudBook == null) { // 没有找到云端的，但是客户端有ID？
+                // 不用管它，可能是其他设备已经删除云端，就当做它不存在啦
+                // ?当然也有可能是用户自己随便改了个ID，这本书不是该用户的
+                localBooks.remove(i--);
+            }
+        }
+
+        // (剩下的local都是没有ID的)
+        // #再匹配客户端无书、云端却有，可能是另一设备先行上传
+        for (int i = 0; i < cloudBooks.size(); i++) {
+            SyncBook cloudBook = cloudBooks.get(i);
+            SyncBook localBook = null;
+            for (int j = 0; j < localBooks.size(); j++) {
+                if (cloudBook.getBookName() == localBooks.get(j).getBookName()) {
+                    // 名字一样，就是这本书了！
+                    localBook = localBooks.get(j);
+                    cloudBooks.remove(i--);
+                    localBooks.remove(j--);
+                    break;
+                }
+            }
+
+            if (localBook == null) {
+                // *云端有，但是客户端没有，需要在客户端进行创建
+                responseBooks.add(cloudBook);
+            }
+        }
+
+        // #最后是客户端新书，云端也没有的，创建
+        for (int i = 0; i < localBooks.size(); i++) {
+            SyncBook localBook = localBooks.get(i);
+            // *创建云端新书
+            SyncBook cloudBook = createBook(localBook, userId);
+            // 返回云端创建的对象
+            responseBooks.add(cloudBook);
+        }
+        return responseBooks;
+    }
+
+    /**
+     * 根据客户端的作品，创建一份云端的数据
+     * (此时数据不全，需要后续重新上传)
+     */
+    public SyncBook createBook(SyncBook localBook, Long userId) {
+        localBook.setUploadTime(0);
+        localBook.setModifyTime(0);
+        localBook.setUserId(userId);
+        bookRepository.save(localBook);
+        return localBook;
+    }
+
+    public SyncBook uploadBookCatalog(Long userId, Long bookIndex, String name, String catalog, long modifyTime) {
+        SyncBook book = getBook(userId, bookIndex);
+        if (book == null) {
+            // *是新作品，创建
+            book = new SyncBook();
+            book.setUserId(userId);
+            book.setBookName(name);
+        }
+        book.setCatalog(catalog);
+        book.setModifyTime(modifyTime);
+        book.setUploadTime(System.currentTimeMillis());
+        bookRepository.save(book);
+        return book;
+    }
+
     public void renameBook(Long bookIndex, Long userId, String newName) {
         SyncBook book = bookRepository.findByBookIndex(bookIndex);
         if (book == null) {
@@ -62,7 +155,7 @@ public class SyncBookService {
         }
         book.setDeleted(true);
         bookRepository.save(book);
-        
+
         // 删除这本书的所有章节
         chapterRepository.deleteBookChapter(bookIndex);
     }
@@ -81,7 +174,7 @@ public class SyncBookService {
         // 删除这本书的所有章节
         chapterRepository.restoreBookChapter(bookIndex);
     }
-    
+
     /**
      * !清空作品回收站，所有已删除的都将无法找回
      */
@@ -89,7 +182,7 @@ public class SyncBookService {
         bookRepository.deleteByUserIdAndDeleted(userId, true);
         chapterRepository.deleteByUserIdAndDeleted(userId, true);
     }
-    
+
     /**
      * !彻底删除某一部作品
      */

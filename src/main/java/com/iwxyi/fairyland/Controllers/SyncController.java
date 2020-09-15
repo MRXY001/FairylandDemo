@@ -1,6 +1,5 @@
 package com.iwxyi.fairyland.Controllers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.iwxyi.fairyland.Exception.GlobalResponse;
@@ -43,78 +42,17 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> startSync(@LoginUser Long userId, @RequestBody List<SyncBook> localBooks) {
-        // 获取云端的作品
-        List<SyncBook> cloudBooks = bookService.getUserBooks(userId);
-        List<SyncBook> responseBooks = new ArrayList<SyncBook>();
 
-        // #先匹配客户端有ID的情况，最优先
-        for (int i = 0; i < localBooks.size(); i++) {
-            SyncBook localBook = localBooks.get(i);
-            if (localBook.getBookIndex() == null) {
-                continue;
-            }
-            SyncBook cloudBook = null;
-            for (int j = 0; j < cloudBooks.size(); j++) {
-                // 云端book肯定都是有ID的
-                if (cloudBooks.get(j).getBookIndex() == localBook.getBookIndex()) {
-                    // ID 一模一样，那就是这本书了！
-                    cloudBook = cloudBooks.get(j);
-                    // ?可能书名不一样，另一设备客户端重命名，导致书名不一样
-                    // *客户端需要额外判断ID的情况，有必要时进行重命名
-                    responseBooks.add(cloudBook);
-                    localBooks.remove(i--);
-                    cloudBooks.remove(j);
-                    break;
-                }
-            }
+        List<SyncBook> responseBooks = bookService.syncLocalAndCloudBooks(userId, localBooks);
 
-            if (cloudBook == null) { // 没有找到云端的，但是客户端有ID？
-                // 不用管它，可能是其他设备已经删除云端，就当做它不存在啦
-                // ?当然也有可能是用户自己随便改了个ID，这本书不是该用户的
-                localBooks.remove(i--);
-            }
-        }
-
-        // (剩下的local都是没有ID的)
-        // #再匹配客户端无书、云端却有，可能是另一设备先行上传
-        for (int i = 0; i < cloudBooks.size(); i++) {
-            SyncBook cloudBook = cloudBooks.get(i);
-            SyncBook localBook = null;
-            for (int j = 0; j < localBooks.size(); j++) {
-                if (cloudBook.getBookName() == localBooks.get(j).getBookName()) {
-                    // 名字一样，就是这本书了！
-                    localBook = localBooks.get(j);
-                    cloudBooks.remove(i--);
-                    localBooks.remove(j--);
-                    break;
-                }
-            }
-
-            if (localBook == null) {
-                // *云端有，但是客户端没有，需要在客户端进行创建
-                responseBooks.add(cloudBook);
-            }
-        }
-
-        // #最后是客户端新书，云端也没有的，创建
-        for (int i = 0; i < localBooks.size(); i++) {
-            SyncBook localBook = localBooks.get(i);
-            // *创建云端新书
-            localBook.setModifyTime(0L);
-            localBook.setUploadTime(0L);
-            localBook.setUserId(userId);
-            SyncBook cloudBook = bookService.save(localBook);
-            // 返回云端创建的对象
-            responseBooks.add(cloudBook);
-        }
-
+        // 返回云端的作品的情况（此时该新建的已经新建，数量是：云端>=客户端）
         return GlobalResponse.map("cloudBooks", responseBooks);
     }
 
     /**
      * #云同步第二步：获取上次拉取后的目录内容
      * 不包含章节、名片等正文片段类的小数据
-     * !查询后全部返回
+     * !查询后全部返回，仅仅目录，数据不会特别大
      * 
      * @param syncTime 设备上次拉取的时间戳。如果为0的话表示全部下载
      * @return 待下载的内容
@@ -134,7 +72,8 @@ public class SyncController {
     /**
      * #云同步第三步（总）：查询上次拉取之后的全部正文内容
      * 包括：章节、大纲、名片等
-     * !可能数据量会特别巨大（一本书几M），达到上百M，以至于中间容易断开
+     * !数据量可能会特别巨大（一本书几M），达到上百M，以至于中间容易断开
+     * !如果是初次同步(syncTime==0)慎用
      * 
      * @param syncTime 设备上次拉取的时间戳。如果为0的话表示全部下载
      * @return 待下载的内容（一次性）
@@ -154,6 +93,7 @@ public class SyncController {
     /**
      * #云同步第三步（分）：获取每一本书的正文
      * (用于解决作品数量过多，导致返回结果太大的问题)
+     * 建议初次同步时使用，逐书下载
      */
     @PostMapping(value = "/downloadBookUpdatedChapters")
     @ResponseBody
@@ -169,20 +109,18 @@ public class SyncController {
 
     /**
      * #云同步第四步：上传作品目录
+     * (允许不存在自动新建)
      */
     @PostMapping(value = "/uploadBookCatalog")
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> uploadBookCatalog(@LoginUser Long userId, @RequestParam("bookIndex") final Long bookIndex,
-            @RequestParam("catalog") final String catalog, @RequestParam("modifyTime") Long modifyTime) {
+            @RequestParam("name") String name, @RequestParam("catalog") final String catalog,
+            @RequestParam("modifyTime") long modifyTime) {
 
-        SyncBook book = bookService.getBook(bookIndex, userId);
-        book.setCatalog(catalog);
-        book.setModifyTime(modifyTime);
-        book.setUploadTime(System.currentTimeMillis());
-        bookService.save(book);
+        SyncBook book = bookService.uploadBookCatalog(userId, bookIndex, name, catalog, modifyTime);
 
-        return new GlobalResponse<>();
+        return GlobalResponse.map("book", book);
     }
 
     /**
@@ -197,7 +135,8 @@ public class SyncController {
     public GlobalResponse<?> uploadChapterContent(@LoginUser Long userId,
             @RequestParam("bookIndex") final Long bookIndex, @RequestParam("chaterId") final String chapterId,
             @RequestParam("title") final String title, @RequestParam("content") final String content,
-            @RequestParam(value = "chapterType", required = false) final int chapterType, @RequestParam("modifyTime") long modifyTime) {
+            @RequestParam(value = "chapterType", required = false) final int chapterType,
+            @RequestParam("modifyTime") long modifyTime) {
 
         SyncChapter chapter = chapterService.uploadChapter(userId, bookIndex, chapterId, title, content, chapterType,
                 modifyTime);
