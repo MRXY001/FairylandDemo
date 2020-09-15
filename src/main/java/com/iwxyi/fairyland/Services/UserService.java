@@ -22,6 +22,14 @@ public class UserService {
 
     Logger logger = LoggerFactory.getLogger(UserService.class);
 
+    /*****************************************************************************************
+     *                                           账号
+     *****************************************************************************************/
+
+    public UserRepository repository() {
+        return userRepository;
+    }
+
     /**
      * 注册
      * 
@@ -197,5 +205,18 @@ public class UserService {
         String passwordHash = bcryptPasswordEncoder().encode(password);
         user.setPasswordHash(passwordHash);
         userRepository.save(user);
+    }
+    
+    /*****************************************************************************************
+     *                                           积分
+     *****************************************************************************************/
+    
+    public User increaseIntegral(User user, int words, int times, int useds, int bonus) {
+        user.setAllWords(user.getAllWords() + words);
+        user.setAllTimes(user.getAllTimes() + times);
+        user.setAllUseds(user.getAllUseds() + useds);
+        user.setAllBonus(user.getAllBonus() + bonus);
+        userRepository.save(user);
+        return user;
     }
 }

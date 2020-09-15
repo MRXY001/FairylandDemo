@@ -77,6 +77,8 @@ public class User {
     @Min(0)
     private int allWords;
     @Min(0)
+    private int allUseds;
+    @Min(0)
     private int allTimes;
     @Min(0)
     private int allBonus;

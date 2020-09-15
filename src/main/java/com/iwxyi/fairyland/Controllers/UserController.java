@@ -1,10 +1,9 @@
 package com.iwxyi.fairyland.Controllers;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 
-import com.iwxyi.fairyland.Config.ErrorCode;
-import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
 import com.iwxyi.fairyland.Interceptor.LoginRequired;
 import com.iwxyi.fairyland.Interceptor.LoginUser;
@@ -19,10 +18,16 @@ import com.iwxyi.fairyland.Tools.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -45,7 +50,7 @@ public class UserController {
     /*****************************************************************************************
      *                                           账号
      *****************************************************************************************/
-    
+
     /**
      * 用户注册
      * @param captcha 验证码，需要先传入手机发送，带着验证码来注册
@@ -158,7 +163,7 @@ public class UserController {
 
     /**
      * 测试token能否使用
-     * 1. 登录（此时会报无token）
+     * 1. 登录
      * 2. 获取生成的token
      * 3. 使用postMan等在header放入token=xxx
      */
@@ -167,17 +172,31 @@ public class UserController {
         return GlobalResponse.success("通过token验证");
     }
 
-    /**
-     * 单纯的测试（大概也会有黑客从这里进入测试吧？）
-     */
-    @RequestMapping("/test")
-    public void test() {
-        throw new FormatedException("恭喜您，成功找到了测试入口~", ErrorCode.Test);
-    }
-
     /*****************************************************************************************
      *                                           积分
      *****************************************************************************************/
-    
-    
+
+    @RequestMapping("/increaseIntegral")
+    @LoginRequired
+    public GlobalResponse<?> uploadIntegral(@LoginUser User user, @RequestParam("words") int words,
+            @RequestParam("times") int times, @RequestParam("useds") int useds, @RequestParam("bonus") int bonus) {
+        user = userService.increaseIntegral(user, words, times, useds, bonus);
+        return GlobalResponse.success(user);
+    }
+
+    /* @RequestMapping("/rank")
+    @ResponseBody
+    public String rank(Model model, Integer pageNumber, HttpServletResponse response) {
+        if (pageNumber == null) {
+            pageNumber = 1;
+        }
+
+        // 排序方式，这里以等级进行排序
+        Sort sort = new Sort(Sort.Direction.DESC, "level"); // 一定要是实体类的属性
+        Pageable pageable = new PageRequest(pageNumber - 1, 20, sort); // 当前页，每页记录数，排序方式
+        Page<User> users = userService.repository().findAll();
+        model.addAttribute("pageInfo", users);
+        response.addHeader("x-frame-options", "SAMEORIGIN"); // 允许iframe
+        return "user_list";
+    } */
 }
