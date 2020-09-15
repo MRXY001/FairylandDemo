@@ -106,7 +106,8 @@ public class SyncController {
     @PostMapping(value = "/uploadBookCatalog")
     @ResponseBody
     @LoginRequired
-    public GlobalResponse<?> uploadBookCatalog(@LoginUser Long userId, @RequestParam("bookIndex") final Long bookIndex,
+    public GlobalResponse<?> uploadBookCatalog(@LoginUser Long userId,
+            @RequestParam(value = "bookIndex", required = false) final Long bookIndex,
             @RequestParam("name") String name, @RequestParam("catalog") final String catalog,
             @RequestParam("modifyTime") long modifyTime) {
         SyncBook book = bookService.uploadBookCatalog(userId, bookIndex, name, catalog, modifyTime);

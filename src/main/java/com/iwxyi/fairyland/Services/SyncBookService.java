@@ -11,7 +11,9 @@ import com.iwxyi.fairyland.Repositories.SyncChapterRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 public class SyncBookService {
     @Autowired
@@ -29,10 +31,10 @@ public class SyncBookService {
 
     private SyncBook getBook(Long userId, Long bookIndex) {
         SyncBook book = bookRepository.findByBookIndex(bookIndex);
-        if (book == null || book.getUserId() != userId) {
+        if (book != null && book.getUserId() != userId) {
             // ?这本书不是这个用户的？可能是用户好奇手动改的ID
             // (也可能是黑客轰炸，尝试挨个拉取作品)
-            throw new FormatedException("未找到作品", ErrorCode.NotExist);
+            throw new FormatedException("未找到该用户的作品", ErrorCode.NotExist);
         }
         return book;
     }
@@ -181,6 +183,8 @@ public class SyncBookService {
      * !清空作品回收站，所有已删除的都将无法找回
      */
     public void cleanRecycle(Long userId) {
+        System.out.println("删除删除" + userId);
+        // bookRepository.cleanUserBooks(userId);
         bookRepository.deleteByUserIdAndDeleted(userId, true);
         chapterRepository.deleteByUserIdAndDeleted(userId, true);
         chapterRepository.deleteByUserIdAndBookDeleted(userId, true);
