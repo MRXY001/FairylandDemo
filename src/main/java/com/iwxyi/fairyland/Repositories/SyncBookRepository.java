@@ -10,12 +10,10 @@ public interface SyncBookRepository extends CrudRepository<SyncBook, Long> {
     List<SyncBook> findByUserIdOrderByModifyTimeDesc(Long userId);
 
     SyncBook findByBookIndex(Long bookIndex);
+    
+    SyncBook findByBookIndexAndUserId(Long bookIndex, Long userId);
 
-    // @Query("select b from sync_book b where user_id = :userId and deleted != 1 order by modify_time desc")
-    // List<SyncBook> getUserBooks(@Param("userId") Long userId);
     List<SyncBook> findByUserIdAndDeletedNot(Long userId, boolean notDeleted);
 
-    // @Query("select b from sync_book b where user_id = :userId and deleted != 1 and modify_time > :earlyTime order by modify_time desc")
-    // List<SyncBook> getUserUpdatedBooks(@Param("userId") Long userId, @Param("earlyTime") Timestamp earlyTime);
     List<SyncBook> findByUserIdAndDeletedNotAndModifyTimeGreaterThan(Long userId, boolean notDeleted, long earlyTime);
 }

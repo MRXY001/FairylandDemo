@@ -27,6 +27,7 @@ public class SyncChapter {
     private long uploadTime = 0L;
     private long modifyTime = 0L;
     private int publishState;
+    private boolean bookDeleted;
     private boolean deleted;
 
     public SyncChapter(Long bookIndex, Long userId, String title, String content) {

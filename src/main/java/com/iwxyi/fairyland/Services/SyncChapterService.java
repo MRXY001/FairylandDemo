@@ -22,7 +22,7 @@ public class SyncChapterService {
 
     public List<SyncChapter> getUserUpdatedChapters(Long userId, long timestamp) {
         // return chapterRepository.getUserUpdatedChapters(userId, timestamp);
-        return chapterRepository.findByUserIdAndDeletedNotAndModifyTimeGreaterThan(userId, true, timestamp);
+        return chapterRepository.findByUserIdAndDeletedNotAndBookDeletedNotModifyTimeGreaterThan(userId, true, true, timestamp);
     }
     
     public SyncChapter getChapter(Long chapterIndex, Long bookIndex, Long userId) {
@@ -38,5 +38,41 @@ public class SyncChapterService {
 
     public SyncChapter save(SyncChapter chapter) {
         return chapterRepository.save(chapter);
+    }
+    
+    public void renameChapter(Long chapterIndex, Long userId, String newName) {
+        SyncChapter chapter = chapterRepository.findByChapterIndex(chapterIndex);
+        if (chapter == null) {
+            throw new FormatedException("章节不存在", ErrorCode.NotExist);
+        } else if (chapter.getUserId() != userId) {
+            // !不是这个用户的章节
+            throw new FormatedException("不能操作非自己的章节", ErrorCode.User);
+        }
+        chapter.setTitle(newName);
+        chapterRepository.save(chapter);
+    }
+    
+    public void deleteChapter(Long chapterIndex, Long userId) {
+        SyncChapter chapter = chapterRepository.findByChapterIndex(chapterIndex);
+        if (chapter == null) {
+            throw new FormatedException("章节不存在", ErrorCode.NotExist);
+        } else if (chapter.getUserId() != userId) {
+            // !不是这个用户的章节
+            throw new FormatedException("不能操作非自己的章节", ErrorCode.User);
+        }
+        chapter.setDeleted(true);
+        chapterRepository.save(chapter);
+    }
+
+    public void restoreChapter(Long chapterIndex, Long userId) {
+        SyncChapter chapter = chapterRepository.findByChapterIndex(chapterIndex);
+        if (chapter == null) {
+            throw new FormatedException("章节不存在", ErrorCode.NotExist);
+        } else if (chapter.getUserId() != userId) {
+            // !不是这个用户的章节
+            throw new FormatedException("不能操作非自己的章节", ErrorCode.User);
+        }
+        chapter.setDeleted(false);
+        chapterRepository.save(chapter);
     }
 }

@@ -46,7 +46,7 @@ public class SyncController {
         // 获取云端的作品
         List<SyncBook> cloudBooks = bookService.getUserBooks(userId);
         List<SyncBook> responseBooks = new ArrayList<SyncBook>();
-        
+
         // #先匹配客户端有ID的情况，最优先
         for (int i = 0; i < localBooks.size(); i++) {
             SyncBook localBook = localBooks.get(i);
@@ -137,7 +137,7 @@ public class SyncController {
      * !可能数据量会特别巨大（一本书几M），达到上百M，以至于中间容易断开
      * 
      * @param syncTime 设备上次拉取的时间戳。如果为0的话表示全部下载
-     * @return 待下载的内容
+     * @return 待下载的内容（一次性）
      */
     @PostMapping(value = "/downloadUpdatedChapters")
     @ResponseBody
@@ -192,5 +192,61 @@ public class SyncController {
         chapterService.save(chapter);
 
         return GlobalResponse.map("chapterIndex", chapter.getChapterIndex());
+    }
+
+    /**
+     * 重命名作品
+     * *主键外键索引，和名字无关，所以只需要修改book表中的名字即可
+     */
+    public GlobalResponse<?> renameBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
+            @RequestParam("newName") String newName) {
+
+        bookService.renameBook(userId, bookIndex, newName);
+
+        return GlobalResponse.success();
+    }
+
+    /**
+     * 重命名章节
+     * *这里改的是title，而不是chapterIndex(全部)或者chapterId(book内)
+     */
+    public GlobalResponse<?> renameChapter(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
+            @RequestParam("chapterIndex") Long chapterIndex, @RequestParam("newName") String newName) {
+
+        chapterService.renameChapter(chapterIndex, userId, newName);
+
+        return GlobalResponse.success();
+    }
+
+    /**
+     * 删除作品
+     * 删除时会把所有相关的数据都删除掉，比如章节等
+     */
+    public GlobalResponse<?> deleteBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
+
+        bookService.deleteBook(bookIndex, userId);
+
+        return GlobalResponse.success();
+    }
+
+    public GlobalResponse<?> deleteChapter(@LoginUser Long userId, @RequestParam("chapterIndex") Long chapterIndex) {
+
+        chapterService.deleteChapter(chapterIndex, userId);
+
+        return GlobalResponse.success();
+    }
+    
+    public GlobalResponse<?> restoreBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
+
+        bookService.restoreBook(bookIndex, userId);
+
+        return GlobalResponse.success();
+    }
+
+    public GlobalResponse<?> restoreChapter(@LoginUser Long userId, @RequestParam("chapterIndex") Long chapterIndex) {
+
+        chapterService.restoreChapter(chapterIndex, userId);
+
+        return GlobalResponse.success();
     }
 }
