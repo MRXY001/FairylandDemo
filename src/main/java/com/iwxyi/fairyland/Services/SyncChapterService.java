@@ -16,16 +16,18 @@ public class SyncChapterService {
     SyncChapterRepository chapterRepository;
 
     public List<SyncChapter> getUserChapters(Long userId) {
-        // return chapterRepository.getUserChapters(userId);
         return chapterRepository.findByUserId(userId);
     }
 
     public List<SyncChapter> getUserUpdatedChapters(Long userId, long timestamp) {
-        // return chapterRepository.getUserUpdatedChapters(userId, timestamp);
         return chapterRepository.findByUserIdAndDeletedNotAndBookDeletedNotModifyTimeGreaterThan(userId, true, true, timestamp);
     }
     
-    public SyncChapter getChapter(Long chapterIndex, Long bookIndex, Long userId) {
+    public List<SyncChapter> getBookUpdatedChapters(Long userId, Long bookIndex, long timestamp) {
+        return chapterRepository.findByUserIdAndBookIndexAndDeletedNotAndBookDeletedNotModifyTimeGreaterThan(userId, bookIndex, true, true, timestamp);
+    }
+    
+    public SyncChapter getChapterByChapterIndex(Long chapterIndex, Long bookIndex, Long userId) {
         SyncChapter chapter = chapterRepository.findByChapterIndex(chapterIndex);
         if (chapter != null) {
             if (chapter.getBookIndex() != bookIndex || chapter.getUserId() != userId) {
@@ -35,13 +37,33 @@ public class SyncChapterService {
         }
         return chapter;
     }
+    
+    public SyncChapter getChapterByChapterId(Long bookIndex, String chapterId, Long userId) {
+        SyncChapter chapter = chapterRepository.findFirstByUserIdAndBookIndexAndChapterId(userId, bookIndex, chapterId);
+        return chapter;
+    }
 
     public SyncChapter save(SyncChapter chapter) {
         return chapterRepository.save(chapter);
     }
     
-    public void renameChapter(Long chapterIndex, Long userId, String newName) {
-        SyncChapter chapter = chapterRepository.findByChapterIndex(chapterIndex);
+    public SyncChapter uploadChapter(Long userId, Long bookIndex, String chapterId, String title, String content, int chapterType, long modifyTime) {
+        SyncChapter chapter = getChapterByChapterId(bookIndex, chapterId, userId);
+        if (chapter == null) {
+            // *创建chapter
+            chapter = new SyncChapter(userId, bookIndex, chapterId, title, content);
+            chapter.setChapterType(chapterType);
+            chapter.setCreateTime(System.currentTimeMillis());
+        }
+        chapter.setTitle(title);
+        chapter.setContent(content);
+        chapter.setModifyTime(modifyTime);
+        chapter.setUploadTime(System.currentTimeMillis());
+        return save(chapter);
+    }
+    
+    public void renameChapter(Long userId, Long bookIndex, String chapterId, String newName) {
+        SyncChapter chapter = chapterRepository.findFirstByUserIdAndBookIndexAndChapterId(userId, bookIndex, chapterId);
         if (chapter == null) {
             throw new FormatedException("章节不存在", ErrorCode.NotExist);
         } else if (chapter.getUserId() != userId) {
@@ -52,8 +74,8 @@ public class SyncChapterService {
         chapterRepository.save(chapter);
     }
     
-    public void deleteChapter(Long chapterIndex, Long userId) {
-        SyncChapter chapter = chapterRepository.findByChapterIndex(chapterIndex);
+    public void deleteChapter(Long userId, Long bookIndex, String chapterId) {
+        SyncChapter chapter = chapterRepository.findFirstByUserIdAndBookIndexAndChapterId(userId, bookIndex, chapterId);
         if (chapter == null) {
             throw new FormatedException("章节不存在", ErrorCode.NotExist);
         } else if (chapter.getUserId() != userId) {
@@ -64,8 +86,8 @@ public class SyncChapterService {
         chapterRepository.save(chapter);
     }
 
-    public void restoreChapter(Long chapterIndex, Long userId) {
-        SyncChapter chapter = chapterRepository.findByChapterIndex(chapterIndex);
+    public void restoreChapter(Long userId, Long bookIndex, String chapterId) {
+        SyncChapter chapter = chapterRepository.findFirstByUserIdAndBookIndexAndChapterId(userId, bookIndex, chapterId);
         if (chapter == null) {
             throw new FormatedException("章节不存在", ErrorCode.NotExist);
         } else if (chapter.getUserId() != userId) {

@@ -19,12 +19,10 @@ public class SyncBookService {
     SyncChapterRepository chapterRepository;
 
     public List<SyncBook> getUserBooks(Long userId) {
-        // return bookRepository.getUserBooks(userId);
         return bookRepository.findByUserIdAndDeletedNot(userId, true);
     }
 
     public List<SyncBook> getUserUpdatedBooks(Long userId, long time) {
-        // return bookRepository.getUserUpdatedBooks(userId, time);
         return bookRepository.findByUserIdAndDeletedNotAndModifyTimeGreaterThan(userId, true, time);
     }
 

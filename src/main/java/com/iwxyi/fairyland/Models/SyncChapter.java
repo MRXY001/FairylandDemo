@@ -19,10 +19,11 @@ public class SyncChapter {
     private Long chapterIndex;
     private Long bookIndex;
     private Long userId;
-    private String chapterId; // 这个是作品内章节唯一ID
+    private String chapterId; // 这个是作品内章节唯一ID，后台不使用这个
     @Length(min = 1, max = 20, message = "章节名不能超过20个字")
     private String title;
     private String content;
+    private int chapterType; // 章节种类：0章节（默认）
     private long createTime = 0L;
     private long uploadTime = 0L;
     private long modifyTime = 0L;
@@ -30,9 +31,10 @@ public class SyncChapter {
     private boolean bookDeleted;
     private boolean deleted;
 
-    public SyncChapter(Long bookIndex, Long userId, String title, String content) {
-        this.bookIndex = bookIndex;
+    public SyncChapter(Long userId, Long bookIndex, String chapterId, String title, String content) {
         this.userId = userId;
+        this.bookIndex = bookIndex;
+        this.chapterId = chapterId;
         this.title = title;
         this.content = content;
     }

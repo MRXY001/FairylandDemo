@@ -35,7 +35,7 @@ public class SyncController {
     /**
      * #云同步第一步：准备进行同步，进行ID的匹配等等
      * {"books": [{"name": "书名", "bookIndex": 1234, "modifyTime:": 时间戳(13)}, {书2}]}
-     * !这些进行匹配的book，不需要到太多数据，尤其是catalog
+     * !这些进行匹配的book，不需要到太多数据，尤其是别带catalog
      * 
      * @return 云端现有或应有的作品列表
      */
@@ -132,7 +132,7 @@ public class SyncController {
     }
 
     /**
-     * #云同步第三步：查询上次拉取之后的正文内容（片段）
+     * #云同步第三步（总）：查询上次拉取之后的全部正文内容
      * 包括：章节、大纲、名片等
      * !可能数据量会特别巨大（一本书几M），达到上百M，以至于中间容易断开
      * 
@@ -152,16 +152,34 @@ public class SyncController {
     }
 
     /**
+     * #云同步第三步（分）：获取每一本书的正文
+     * (用于解决作品数量过多，导致返回结果太大的问题)
+     */
+    @PostMapping(value = "/downloadBookUpdatedChapters")
+    @ResponseBody
+    @LoginRequired
+    public GlobalResponse<?> downloadBookUpdatedChapters(@LoginUser Long userId,
+            @RequestParam("bookIndex") Long bookIndex, @RequestParam("syncTime") final Long syncTime) {
+
+        // #获取这本作品有更新的章节列表
+        List<SyncChapter> syncChapters = chapterService.getBookUpdatedChapters(userId, bookIndex, syncTime);
+
+        return GlobalResponse.map("bookIndex", bookIndex, "chapters", syncChapters);
+    }
+
+    /**
      * #云同步第四步：上传作品目录
      */
     @PostMapping(value = "/uploadBookCatalog")
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> uploadBookCatalog(@LoginUser Long userId, @RequestParam("bookIndex") final Long bookIndex,
-            @RequestParam("catalog") final String catalog) {
+            @RequestParam("catalog") final String catalog, @RequestParam("modifyTime") Long modifyTime) {
 
         SyncBook book = bookService.getBook(bookIndex, userId);
         book.setCatalog(catalog);
+        book.setModifyTime(modifyTime);
+        book.setUploadTime(System.currentTimeMillis());
         bookService.save(book);
 
         return new GlobalResponse<>();
@@ -169,7 +187,7 @@ public class SyncController {
 
     /**
      * #云同步第五步：上传作品章节或相关数据
-     * *需要先存在作品实体（如果有正确的chapterIndex的话应当存在）
+     * *需要先存在作品实体
      * 
      * @param chapterType 章节种类，0章节，1大纲，其他以后再加(其实除了要用的章节，其余和后端关系不大)
      */
@@ -177,19 +195,12 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> uploadChapterContent(@LoginUser Long userId,
-            @RequestParam("bookIndex") final Long bookIndex,
-            @RequestParam(value = "chapterIndex", required = false) final Long chapterIndex,
-            @RequestParam("title") String title, @RequestParam("content") final String content,
-            @RequestParam("chapterType") final int chapterType, @RequestParam("modifyTime") long modifyTime) {
+            @RequestParam("bookIndex") final Long bookIndex, @RequestParam("chaterId") final String chapterId,
+            @RequestParam("title") final String title, @RequestParam("content") final String content,
+            @RequestParam(value = "chapterType", required = false) final int chapterType, @RequestParam("modifyTime") long modifyTime) {
 
-        SyncChapter chapter;
-        if (chapterIndex == null || chapterIndex <= 0) {
-            chapter = new SyncChapter(bookIndex, userId, title, content);
-        } else {
-            chapter = chapterService.getChapter(chapterIndex, bookIndex, userId);
-        }
-        chapter.setModifyTime(modifyTime);
-        chapterService.save(chapter);
+        SyncChapter chapter = chapterService.uploadChapter(userId, bookIndex, chapterId, title, content, chapterType,
+                modifyTime);
 
         return GlobalResponse.map("chapterIndex", chapter.getChapterIndex());
     }
@@ -211,15 +222,15 @@ public class SyncController {
 
     /**
      * 重命名章节
-     * *这里改的是title，而不是chapterIndex(全部)或者chapterId(book内)
+     * *这里改的是title，而不是chapterId(book内)
      */
     @PostMapping(value = "/renameChapter")
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> renameChapter(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
-            @RequestParam("chapterIndex") Long chapterIndex, @RequestParam("newName") String newName) {
+            @RequestParam("chapterId") String chapterId, @RequestParam("newName") String newName) {
 
-        chapterService.renameChapter(chapterIndex, userId, newName);
+        chapterService.renameChapter(userId, bookIndex, chapterId, newName);
 
         return GlobalResponse.success();
     }
@@ -241,13 +252,14 @@ public class SyncController {
     @PostMapping(value = "/deleteChapter")
     @ResponseBody
     @LoginRequired
-    public GlobalResponse<?> deleteChapter(@LoginUser Long userId, @RequestParam("chapterIndex") Long chapterIndex) {
+    public GlobalResponse<?> deleteChapter(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
+            @RequestParam("chapterId") String chapterId) {
 
-        chapterService.deleteChapter(chapterIndex, userId);
+        chapterService.deleteChapter(userId, bookIndex, chapterId);
 
         return GlobalResponse.success();
     }
-    
+
     @PostMapping(value = "/restoreBook")
     @ResponseBody
     @LoginRequired
@@ -261,20 +273,40 @@ public class SyncController {
     @PostMapping(value = "/restoreChapter")
     @ResponseBody
     @LoginRequired
-    public GlobalResponse<?> restoreChapter(@LoginUser Long userId, @RequestParam("chapterIndex") Long chapterIndex) {
+    public GlobalResponse<?> restoreChapter(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
+            @RequestParam("chapterId") String chapterId) {
 
-        chapterService.restoreChapter(chapterIndex, userId);
+        chapterService.restoreChapter(userId, bookIndex, chapterId);
 
         return GlobalResponse.success();
     }
-    
+
+    /**
+     * !清空作品回收站，无法恢复
+     * 不影响未删除的作品
+     * 如果需要删除所有作品，则需要先删除所有现有作品，再清空回收站
+     */
     @PostMapping(value = "/cleanRecycle")
     @ResponseBody
     @LoginRequired
-    public GlobalResponse<?> cleanRecycle() {
-        
-        
-        
+    public GlobalResponse<?> cleanRecycle(@LoginUser Long userId) {
+
+        bookService.cleanRecycle(userId);
+
+        return GlobalResponse.success();
+    }
+
+    /**
+     * !彻底删除某一部作品，无法恢复
+     * 无论该作品状态如何，都会清空掉
+     */
+    @PostMapping(value = "/cleanRecycle")
+    @ResponseBody
+    @LoginRequired
+    public GlobalResponse<?> cleanBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
+
+        bookService.cleanBook(bookIndex, userId);
+
         return GlobalResponse.success();
     }
 }
