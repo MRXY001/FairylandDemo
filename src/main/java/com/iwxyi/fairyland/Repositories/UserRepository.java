@@ -18,5 +18,5 @@ public interface UserRepository extends CrudRepository<User, Long> {
     
     User findByUsernameOrPhoneNumberOrEmailAddress(String username, String phoneNumber, String emailAddress);
 
-    Page<User> findByLevel(int level, Pageable pageable);
+    Page<User> findAll(Pageable pageable);
 }

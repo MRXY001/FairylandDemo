@@ -1,7 +1,6 @@
 package com.iwxyi.fairyland.Controllers;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 
 import com.iwxyi.fairyland.Exception.GlobalResponse;
@@ -22,7 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -184,19 +182,16 @@ public class UserController {
         return GlobalResponse.success(user);
     }
 
-    /* @RequestMapping("/rank")
+    @RequestMapping("/rank")
     @ResponseBody
-    public String rank(Model model, Integer pageNumber, HttpServletResponse response) {
+    public GlobalResponse<?> rank(@RequestParam(value = "pageNumber", required = false) Integer pageNumber) {
         if (pageNumber == null) {
             pageNumber = 1;
         }
 
         // 排序方式，这里以等级进行排序
-        Sort sort = new Sort(Sort.Direction.DESC, "level"); // 一定要是实体类的属性
-        Pageable pageable = new PageRequest(pageNumber - 1, 20, sort); // 当前页，每页记录数，排序方式
-        Page<User> users = userService.repository().findAll();
-        model.addAttribute("pageInfo", users);
-        response.addHeader("x-frame-options", "SAMEORIGIN"); // 允许iframe
-        return "user_list";
-    } */
+        Pageable pageable = PageRequest.of(pageNumber - 1, 20, Sort.by(Sort.Direction.DESC, "level"));
+        Page<User> users = userService.repository().findAll(pageable);
+        return GlobalResponse.success(users);
+    }
 }
