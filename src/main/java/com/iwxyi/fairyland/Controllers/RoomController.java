@@ -10,11 +10,12 @@ import com.iwxyi.fairyland.Services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -39,12 +40,40 @@ public class RoomController {
         Room room = roomService.createRoom(user, roomName, password, introduction);
         return GlobalResponse.success(room);
     }
-    
-    
+
+    /**
+     * 加入房间
+     * *如果用户已经加入了其他房间，则会加入失败
+     */
+    @PostMapping(value = "/join")
+    public GlobalResponse<?> joinRoom(@LoginUser User user, @RequestParam("roomId") Long roomId) {
+        Room room = roomService.joinRoom(user, roomId);
+        return GlobalResponse.success(room);
+    }
+
+    /**
+     * 离开房间
+     */
+    @PostMapping(value = "/leave")
+    public GlobalResponse<?> leaveRoom(@LoginUser User user) {
+        roomService.leaveRoom(user);
+        return GlobalResponse.success();
+    }
+
+    @PostMapping(value = "/disband")
+    public GlobalResponse<?> disbandRoom(@LoginUser Long userId, @RequestParam("roomId") Long roomId) {
+        roomService.disbandRoom(userId, roomId);
+        return GlobalResponse.success();
+    }
 
     @PostMapping(value = "/rank")
-    @ResponseBody
-    public GlobalResponse<?> rank() {
-        return GlobalResponse.success();
+    public GlobalResponse<?> roomRank(@RequestParam(value = "pageNumber", required = false) Integer pageNumber) {
+        if (pageNumber == null) {
+            pageNumber = 1;
+        }
+        
+        // 排序方式：等级
+        Page<Room> rooms = roomService.pagedRank(pageNumber, 20, Sort.by(Sort.Direction.DESC, "level"));
+        return GlobalResponse.success(rooms);
     }
 }

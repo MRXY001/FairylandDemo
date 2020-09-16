@@ -10,9 +10,9 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface RoomRepository extends CrudRepository<Room, Long> {
     Room findByRoomId(Long roomId);
-    
+
     List<Room> findByOwnerId(Long ownerId);
-    
+
     Page<Room> findAll(Pageable pageable);
-    
+
 }
