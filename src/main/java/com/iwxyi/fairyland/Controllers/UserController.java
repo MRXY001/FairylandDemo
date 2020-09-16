@@ -175,8 +175,8 @@ public class UserController {
     @RequestMapping("/increaseIntegral")
     @LoginRequired
     public GlobalResponse<?> uploadIntegral(@LoginUser User user, @RequestParam("words") int words,
-            @RequestParam("times") int times, @RequestParam("useds") int useds, @RequestParam("bonus") int bonus) {
-        user = userService.increaseIntegral(user, words, times, useds, bonus);
+            @RequestParam("times") int times, @RequestParam("useds") int useds, @RequestParam("bonus") int bonus, @RequestParam("speed") Integer speed) {
+        user = userService.increaseIntegral(user, words, times, useds, bonus, speed);
         return GlobalResponse.success(user);
     }
 

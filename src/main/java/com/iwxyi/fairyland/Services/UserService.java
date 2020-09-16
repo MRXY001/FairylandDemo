@@ -1,12 +1,10 @@
 package com.iwxyi.fairyland.Services;
 
 import java.util.Date;
-import java.util.List;
 
 import com.iwxyi.fairyland.Config.ConstantValue;
 import com.iwxyi.fairyland.Config.ErrorCode;
 import com.iwxyi.fairyland.Exception.FormatedException;
-import com.iwxyi.fairyland.Models.RoomMember;
 import com.iwxyi.fairyland.Models.User;
 import com.iwxyi.fairyland.Repositories.RoomMemberRepository;
 import com.iwxyi.fairyland.Repositories.UserRepository;
@@ -216,24 +214,37 @@ public class UserService {
      *                                           积分
      *****************************************************************************************/
 
-    public User increaseIntegral(User user, int words, int times, int useds, int bonus) {
+    public User increaseIntegral(User user, int words, int times, int useds, int bonus, Integer speed) {
         // 检测速度，防作弊系统
+        if (times < 0 || times > 10) { // 超过10分钟才上传，这不奇怪？
+            throw new FormatedException("古怪的时间", ErrorCode.Data);
+        } else if (times == 0 && words >= 200) {
+            throw new FormatedException("奇怪的字数", ErrorCode.Data);
+        } else if ((times <= 2) && words / times > 400) { // 可能是相邻两分钟的字数
+            throw new FormatedException("神奇的速度", ErrorCode.Data);
+        } else if (times > 0 && words / times > 200) {
+            throw new FormatedException("怪异的速度", ErrorCode.Data);
+        }
 
         // 添加到用户信息中
         user.setAllWords(user.getAllWords() + words);
         user.setAllTimes(user.getAllTimes() + times);
         user.setAllUseds(user.getAllUseds() + useds);
         user.setAllBonus(user.getAllBonus() + bonus);
+        if (speed != null && speed > 0) {
+            user.setCodeSpeed(speed);
+        }
         userRepository.save(user);
 
         // 累计字数到所有拼字房间
         if (user.getRoomJoinedCount() > 0) {
-            List<RoomMember> roomMembers = roomMemberRepository.findByUserId(user.getUserId());
-            int contributor = words + times; // 只计算字数
+            int contribution = words + times; // 只计算字数，以及少量时间
+            roomMemberRepository.increaseRoomMemberIntegral(user.getUserId(), contribution);
+            /* List<RoomMember> roomMembers = roomMemberRepository.findByUserId(user.getUserId());
             for (RoomMember roomMember : roomMembers) {
-                roomMember.setIntegral(roomMember.getIntegral() + contributor);
+                roomMember.setIntegral(roomMember.getIntegral() + contribution);
                 roomMemberRepository.save(roomMember);
-            }
+            } */
         }
 
         return user;
