@@ -12,6 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +29,6 @@ public class UserService {
     /*****************************************************************************************
      *                                           账号
      *****************************************************************************************/
-
-    public UserRepository repository() {
-        return userRepository;
-    }
 
     /**
      * 注册
@@ -218,5 +218,11 @@ public class UserService {
         user.setAllBonus(user.getAllBonus() + bonus);
         userRepository.save(user);
         return user;
+    }
+    
+    public Page<User> pagedRank(int page, int size, Sort sort) {
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<User> users = userRepository.findAll(pageable);
+        return users;
     }
 }

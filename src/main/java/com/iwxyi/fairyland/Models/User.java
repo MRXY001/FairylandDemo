@@ -88,6 +88,8 @@ public class User {
     private int wordsYesterday;
     @Min(0)
     private int writeSpeed; // 每小时多少字
+    Long roomId; // 加入的房间，以此判断房间中有哪些成员
+    private Date joinRoomTime; // 创建
 
     @Transient // 不存到数据库里
     private boolean vip; // 是否是VIP

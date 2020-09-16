@@ -18,8 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -190,8 +188,7 @@ public class UserController {
         }
 
         // 排序方式，这里以等级进行排序
-        Pageable pageable = PageRequest.of(pageNumber - 1, 20, Sort.by(Sort.Direction.DESC, "level"));
-        Page<User> users = userService.repository().findAll(pageable);
+        Page<User> users = userService.pagedRank(pageNumber - 1, 20, Sort.by(Sort.Direction.DESC, "level"));
         return GlobalResponse.success(users);
     }
 }
