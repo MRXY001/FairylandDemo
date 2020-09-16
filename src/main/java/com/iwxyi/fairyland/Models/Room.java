@@ -7,7 +7,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -28,7 +27,6 @@ public class Room {
     private Long ownerId; // 当前房主的Id，可空
     @NotBlank(message = "房间名称不能为空")
     @Length(min = 2, max = 16, message = "房间名称长度必须在{min}~{max}之间")
-    @Pattern(regexp = "^\\w[\\w\\d_]{1,15}$", message = "房间名称只允许2~16位的大小写字母/数字/下划线，且要求字母开头")
     private String roomName;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;

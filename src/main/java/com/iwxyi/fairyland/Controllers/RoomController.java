@@ -1,5 +1,6 @@
 package com.iwxyi.fairyland.Controllers;
 
+import com.iwxyi.fairyland.Authentication.LoginRequired;
 import com.iwxyi.fairyland.Authentication.LoginUser;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
 import com.iwxyi.fairyland.Models.Room;
@@ -34,6 +35,7 @@ public class RoomController {
      * *如果用户已经有房间的话，则会创建失败
      */
     @PostMapping(value = "/create")
+    @LoginRequired
     public GlobalResponse<?> createRoom(@LoginUser User user, @RequestParam("roomName") String roomName,
             @RequestParam(value = "password", required = false) String password,
             @RequestParam(value = "introduction", required = false) String introduction) {
@@ -46,6 +48,7 @@ public class RoomController {
      * *如果用户已经加入了其他房间，则会加入失败
      */
     @PostMapping(value = "/join")
+    @LoginRequired
     public GlobalResponse<?> joinRoom(@LoginUser User user, @RequestParam("roomId") Long roomId) {
         Room room = roomService.joinRoom(user, roomId);
         return GlobalResponse.success(room);
@@ -55,12 +58,14 @@ public class RoomController {
      * 离开房间
      */
     @PostMapping(value = "/leave")
+    @LoginRequired
     public GlobalResponse<?> leaveRoom(@LoginUser User user, @RequestParam("roomId") Long roomId) {
         roomService.leaveRoom(user, roomId);
         return GlobalResponse.success();
     }
 
     @PostMapping(value = "/disband")
+    @LoginRequired
     public GlobalResponse<?> disbandRoom(@LoginUser Long userId, @RequestParam("roomId") Long roomId) {
         roomService.disbandRoom(userId, roomId);
         return GlobalResponse.success();

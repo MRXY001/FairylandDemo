@@ -40,6 +40,9 @@ public class RoomService {
     Logger logger = LoggerFactory.getLogger(RoomService.class);
 
     public Room createRoom(User user, String roomName, String password, String introduction) {
+        if (user == null) {
+            throw new FormatedException("用户不存在", ErrorCode.User);
+        }
         // 判断用户能否再加入房间
         canUserJoinRoom(user);
         // 创建房间
@@ -55,14 +58,21 @@ public class RoomService {
     }
 
     public Room joinRoom(User user, Room room) {
+        // 判断加入数量上限
         canUserJoinRoom(user);
+
+        // 判断是否已加入
+        RoomMember roomMember = roomMemberRepository.findByRoomIdAndUserId(room.getRoomId(), user.getUserId());
+        if (roomMember != null) {
+            throw new FormatedException("您已经加入了", ErrorCode.Exist);
+        }
 
         // 房间成员数量+1
         room.setMemberCount(room.getMemberCount() + 1);
         room = roomRepository.save(room);
 
         // 保存用户的房间
-        RoomMember roomMember = new RoomMember(room.getRoomId(), user.getUserId(), new Date());
+        roomMember = new RoomMember(room.getRoomId(), user.getUserId(), new Date());
         roomMemberRepository.save(roomMember);
 
         // 保存用户加入房间的历史
@@ -81,10 +91,18 @@ public class RoomService {
     }
 
     public void leaveRoom(User user, Room room) {
+        if (room == null) {
+            throw new FormatedException("未找到房间", ErrorCode.NotExist);
+        }
+        
         // 判断是否确实是加入了
         RoomMember roomMember = roomMemberRepository.findByRoomIdAndUserId(room.getRoomId(), user.getUserId());
         if (roomMember == null) {
             throw new FormatedException("您未加入该房间", ErrorCode.NotExist);
+        }
+        // 如果是房主？
+        if (room.getOwnerId() == user.getUserId()) {
+            throw new FormatedException("房主不能退出自己的拼字房间，请转移房主或解散房间");
         }
 
         // 房间成员数-1
@@ -107,6 +125,24 @@ public class RoomService {
         // 用户加入的房间数-1
         user.setRoomJoinedCount(user.getRoomJoinedCount() - 1);
         userRepository.save(user);
+    }
+    
+    public void transferRoom(User oldOwner, Room room, User newOwner) {
+        if (room.getOwnerId() != oldOwner.getUserId()) {
+            throw new  FormatedException("请先努力成为房主", ErrorCode.Permission);
+        }
+        // 转移房主
+        room.setOwnerId(newOwner.getUserId());
+        roomRepository.save(room);
+        
+        // 修改权限
+        RoomMember oldMember = roomMemberRepository.findByRoomIdAndUserId(room.getRoomId(), oldOwner.getUserId());
+        oldMember.setStatus(0);
+        roomMemberRepository.save(oldMember);
+        
+        RoomMember newMember = roomMemberRepository.findByRoomIdAndUserId(room.getRoomId(), newOwner.getUserId());
+        newMember.setStatus(2);
+        roomMemberRepository.save(newMember);
     }
 
     /**
