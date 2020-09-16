@@ -1,14 +1,18 @@
 package com.iwxyi.fairyland.Services;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.transaction.Transactional;
 
-import com.iwxyi.fairyland.Config.ConstantValue;
 import com.iwxyi.fairyland.Config.ErrorCode;
 import com.iwxyi.fairyland.Exception.FormatedException;
 import com.iwxyi.fairyland.Models.Room;
+import com.iwxyi.fairyland.Models.RoomHistory;
+import com.iwxyi.fairyland.Models.RoomMember;
 import com.iwxyi.fairyland.Models.User;
+import com.iwxyi.fairyland.Repositories.RoomHistoryRepository;
+import com.iwxyi.fairyland.Repositories.RoomMemberRepository;
 import com.iwxyi.fairyland.Repositories.RoomRepository;
 import com.iwxyi.fairyland.Repositories.UserRepository;
 
@@ -28,13 +32,16 @@ public class RoomService {
     RoomRepository roomRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    RoomMemberRepository roomMemberRepository;
+    @Autowired
+    RoomHistoryRepository roomHistoryRepository;
 
     Logger logger = LoggerFactory.getLogger(RoomService.class);
 
     public Room createRoom(User user, String roomName, String password, String introduction) {
-        if (user.getRoomId() != null) {
-            throw new FormatedException("您已加入房间，请离开房间后再创建", ErrorCode.Exist);
-        }
+        // 判断用户能否再加入房间
+        canUserJoinRoom(user);
         // 创建房间
         Room room = new Room(user.getUserId(), roomName, password, introduction);
         room = roomRepository.save(room);
@@ -48,44 +55,52 @@ public class RoomService {
     }
 
     public Room joinRoom(User user, Room room) {
-        if (user.getRoomId() != null) {
-            Room rm = roomRepository.findByRoomId(user.getRoomId());
-            // 有一种情况，就是用户房间删除了，不能创建
-            if (rm != null) {
-                if (rm.getRoomId().equals(room.getRoomId())) { // 就是自己已经加入的房间
-                    return rm;
-                } else { // 其他房间
-                    throw new FormatedException("您已加入房间：" + rm.getRoomName() + "，不可重复加入", ErrorCode.Exist);
-                }
-            }
-        }
+        canUserJoinRoom(user);
         // 房间成员数量+1
         room.setMemberCount(room.getMemberCount() + 1);
         room = roomRepository.save(room);
         // 保存用户的房间
-        user.setRoomId(room.getRoomId());
-        user.setJoinRoomTime(new Date());
-        userRepository.save(user);
+        RoomMember roomMember = new RoomMember(room.getRoomId(), user.getUserId(), new Date());
+        roomMemberRepository.save(roomMember);
+        // 保存用户加入房间的历史
+        RoomHistory roomHistory = new RoomHistory(room.getRoomId(), user.getUserId(), new Date());
+        roomHistoryRepository.save(roomHistory);
         return room;
     }
 
-    public void leaveRoom(User user) {
-        if (user.getRoomId() == null) {
-            throw new FormatedException("您未加入房间", ErrorCode.NotExist);
-        }
-        if (user.getJoinRoomTime().getTime() + ConstantValue.ROOM_LEAVE_INTERVAL > (new Date()).getTime()) {
-            throw new FormatedException("加入房间后需要12小时才能退出", ErrorCode.Wait);
-        }
-        Room room = roomRepository.findByRoomId(user.getRoomId());
-        if (room != null) {
-            // 退出房间，成员数量-1
-            room.setMemberCount(room.getMemberCount() - 1);
-            roomRepository.save(room);
-        }
-        user.setRoomId(null);
-        userRepository.save(user);
+    public void leaveRoom(User user, Long roomId) {
+        leaveRoom(user, roomRepository.findByRoomId(roomId));
     }
 
+    public void leaveRoom(User user, Room room) {
+        // 判断是否确实是加入了
+        RoomMember roomMember = roomMemberRepository.findByRoomIdAndUserId(room.getRoomId(), user.getUserId());
+        if (roomMember == null) {
+            throw new FormatedException("您未加入该房间", ErrorCode.NotExist);
+        }
+
+        // 房间成员数-1
+        room.setMemberCount(room.getMemberCount() - 1);
+        roomRepository.save(room);
+
+        // 用户离开房间
+        int integral = roomMember.getIntegral(); // 这一时刻的积分
+        roomMemberRepository.delete(roomMember);
+
+        // 保存离开房间的历史
+        RoomHistory roomHistory = roomHistoryRepository.findFirstByRoomIdAndUserId(room.getRoomId(), user.getUserId());
+        if (roomHistory == null) {
+            roomHistory = new RoomHistory(room.getRoomId(), user.getUserId(), new Date(), integral);
+        } else {
+            roomHistory.leave(new Date(), integral);
+        }
+        roomHistoryRepository.save(roomHistory);
+    }
+
+    /**
+     * 解散房间
+     * 需要房主才能操作
+     */
     public void disbandRoom(Long userId, Long roomId) {
         Room room = roomRepository.findByRoomId(roomId);
         if (room == null) {
@@ -95,16 +110,40 @@ public class RoomService {
             throw new FormatedException("只有房主才能解散拼字房间", ErrorCode.Permission);
         }
 
-        // 开始解散房间
-        roomRepository.delete(room);
-        
-        // 相关用户都取消房间
-        userRepository.removeUserRoom(roomId);
+        // 移除房间用户
+        List<RoomMember> members = roomMemberRepository.findByRoomId(roomId);
+        for (int i = 0; i < members.size(); i++) {
+            RoomMember member = members.get(i);
+
+            // 保存退出时的记录
+            RoomHistory history = roomHistoryRepository.findFirstByRoomIdAndUserId(roomId, member.getUserId());
+            if (history != null) {
+                history.setLeaveIntegral(member.getIntegral());
+                roomHistoryRepository.save(history);
+            }
+
+            // 彻底移除成员
+            roomMemberRepository.delete(member);
+        }
+
+        // 开始解散房间（标记为deleted）
+        room.setMemberCount(0);
+        room.setDeleted(true);
+        roomRepository.save(room);
     }
-    
+
     public Page<Room> pagedRank(int page, int size, Sort sort) {
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Room> rooms = roomRepository.findAll(pageable);
+        Page<Room> rooms = roomRepository.findByDeletedFalse(pageable);
         return rooms;
+    }
+
+    private boolean canUserJoinRoom(User user) {
+        int maxCount = user.getRoomMaxCount();
+        int count = (roomMemberRepository.findByUserId(user.getUserId())).size();
+        if (count >= maxCount) {
+            throw new FormatedException("您已加入" + count + "个房间，达到上限，请先退出已有房间", ErrorCode.Insufficient);
+        }
+        return true;
     }
 }

@@ -41,6 +41,7 @@ public class Room {
     private int level; // 房间等级
     private boolean official; // 是否是官方的房间（有特权哦）
     private Date createTime;
+    private boolean deleted;
 
     public Room(Long userId, String roomName, String password, String desc) {
         this.creatorId = userId;

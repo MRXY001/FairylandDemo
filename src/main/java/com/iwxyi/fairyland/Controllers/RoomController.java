@@ -55,8 +55,8 @@ public class RoomController {
      * 离开房间
      */
     @PostMapping(value = "/leave")
-    public GlobalResponse<?> leaveRoom(@LoginUser User user) {
-        roomService.leaveRoom(user);
+    public GlobalResponse<?> leaveRoom(@LoginUser User user, @RequestParam("roomId") Long roomId) {
+        roomService.leaveRoom(user, roomId);
         return GlobalResponse.success();
     }
 

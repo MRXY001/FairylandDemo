@@ -11,6 +11,7 @@ public enum ErrorCode {
     NotExist(1006), // 不存在
     Blocked(1007), // 冻结
     Permission(1008), // 权限错误
+    Insufficient(1009), // 数量不够
     // 验证错误
     Invalid(1010), // 无效的：未发送验证码
     Incorrect(1011), // 不正确的
