@@ -1,11 +1,14 @@
 package com.iwxyi.fairyland.Services;
 
 import java.util.Date;
+import java.util.List;
 
 import com.iwxyi.fairyland.Config.ConstantValue;
 import com.iwxyi.fairyland.Config.ErrorCode;
 import com.iwxyi.fairyland.Exception.FormatedException;
+import com.iwxyi.fairyland.Models.RoomMember;
 import com.iwxyi.fairyland.Models.User;
+import com.iwxyi.fairyland.Repositories.RoomMemberRepository;
 import com.iwxyi.fairyland.Repositories.UserRepository;
 
 import org.slf4j.Logger;
@@ -23,6 +26,8 @@ import org.springframework.stereotype.Service;
 public class UserService {
     @Autowired // 装配数据库操作类
     UserRepository userRepository;
+    @Autowired
+    RoomMemberRepository roomMemberRepository;
 
     Logger logger = LoggerFactory.getLogger(UserService.class);
 
@@ -97,7 +102,7 @@ public class UserService {
                 throw new FormatedException("多次密码错误，已临时冻结，请在" + time + "后再试", ErrorCode.Blocked);
             }
         }
-        
+
         // 判断密码是否正确
         if (bcryptPasswordEncoder().matches(password, user.getPasswordHash())) {
             // 允许登录
@@ -109,7 +114,7 @@ public class UserService {
             return user;
         }
         // 设置错误次数+1
-        int failCount = user.getLoginFailedCount()+1;
+        int failCount = user.getLoginFailedCount() + 1;
         user.setLoginFailedCount(failCount);
         // 根据错误次数，设置不同的时间
         String msg = "账号或密码错误";
@@ -145,11 +150,11 @@ public class UserService {
             // 设置为3小时
             time += 3 * 60 * 60 * 1000;
             msg = "密码错误，请3小时后再试";
-        } else if ( failCount <= 11) {
+        } else if (failCount <= 11) {
             // 设置为6小时
             time += 6 * 60 * 60 * 1000;
             msg = "密码错误，请6小时后再试";
-        } else if ( failCount <= 12) {
+        } else if (failCount <= 12) {
             // 设置为12小时
             time += 12 * 60 * 60 * 1000;
             msg = "密码错误，请12小时后再试";
@@ -186,9 +191,9 @@ public class UserService {
         user.setNickname(nickname);
         user.setNicknameModifyTime(currTime);
         userRepository.save(user);
-        return ;
+        return;
     }
-    
+
     public void modifyPassword(User user, String oldPassword, String newPassword) {
         // 判断旧密码是否正确
         if (!bcryptPasswordEncoder().matches(oldPassword, user.getPasswordHash())) {
@@ -199,27 +204,41 @@ public class UserService {
         user.setPasswordHash(passwordHash);
         userRepository.save(user);
     }
-    
+
     public void setPassword(User user, String password) {
         // 密码hash
         String passwordHash = bcryptPasswordEncoder().encode(password);
         user.setPasswordHash(passwordHash);
         userRepository.save(user);
     }
-    
+
     /*****************************************************************************************
      *                                           积分
      *****************************************************************************************/
-    
+
     public User increaseIntegral(User user, int words, int times, int useds, int bonus) {
+        // 检测速度，防作弊系统
+
+        // 添加到用户信息中
         user.setAllWords(user.getAllWords() + words);
         user.setAllTimes(user.getAllTimes() + times);
         user.setAllUseds(user.getAllUseds() + useds);
         user.setAllBonus(user.getAllBonus() + bonus);
         userRepository.save(user);
+
+        // 累计字数到所有拼字房间
+        if (user.getRoomJoinedCount() > 0) {
+            List<RoomMember> roomMembers = roomMemberRepository.findByUserId(user.getUserId());
+            int contributor = words + times; // 只计算字数
+            for (RoomMember roomMember : roomMembers) {
+                roomMember.setIntegral(roomMember.getIntegral() + contributor);
+                roomMemberRepository.save(roomMember);
+            }
+        }
+
         return user;
     }
-    
+
     public Page<User> pagedRank(int page, int size, Sort sort) {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<User> users = userRepository.findAll(pageable);

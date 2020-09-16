@@ -41,7 +41,7 @@ public class User {
     @Length(min = 11, max = 11, message = "请输入正确的手机号")
     @Pattern(regexp = "^(((13[0-9])|(14[579])|(15([0-3]|[5-9]))|(16[6])|(17[0135678])|(18[0-9])|(19[89]))\\d{8})$", message = "请输入正确的手机号")
     private String phoneNumber;
-    
+
     @Min(0)
     @Max(100)
     private int age;
@@ -72,6 +72,7 @@ public class User {
     @Pattern(regexp = "(http|ftp|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?", message = "个人主页配置出错")
     private String homePage;
     private int roomMaxCount = 3; // 默认可以加入多少个房间
+    private int roomJoinedCount; // 当前加入了多少个房间
 
     private int level;
     private int integral;
@@ -119,7 +120,7 @@ public class User {
         this.nickname = username;
         this.createTime = createTime;
     }
-    
+
     // 方便调试时查看数据
     public String simpleString() {
         return "User{ " + "id=" + userId + ", username=" + username + "}";

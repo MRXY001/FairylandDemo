@@ -56,15 +56,23 @@ public class RoomService {
 
     public Room joinRoom(User user, Room room) {
         canUserJoinRoom(user);
+
         // 房间成员数量+1
         room.setMemberCount(room.getMemberCount() + 1);
         room = roomRepository.save(room);
+
         // 保存用户的房间
         RoomMember roomMember = new RoomMember(room.getRoomId(), user.getUserId(), new Date());
         roomMemberRepository.save(roomMember);
+
         // 保存用户加入房间的历史
         RoomHistory roomHistory = new RoomHistory(room.getRoomId(), user.getUserId(), new Date());
         roomHistoryRepository.save(roomHistory);
+
+        // 保存用户加入房间的个数
+        user.setRoomJoinedCount(user.getRoomJoinedCount() + 1);
+        userRepository.save(user);
+
         return room;
     }
 
@@ -95,6 +103,10 @@ public class RoomService {
             roomHistory.leave(new Date(), integral);
         }
         roomHistoryRepository.save(roomHistory);
+        
+        // 用户加入的房间数-1
+        user.setRoomJoinedCount(user.getRoomJoinedCount() - 1);
+        userRepository.save(user);
     }
 
     /**
@@ -122,6 +134,11 @@ public class RoomService {
                 roomHistoryRepository.save(history);
             }
 
+            // 用户加入的房间数量-1
+            User user = userRepository.findByUserId(member.getUserId());
+            user.setRoomJoinedCount(user.getRoomJoinedCount() - 1);
+            userRepository.save(user);
+
             // 彻底移除成员
             roomMemberRepository.delete(member);
         }
@@ -140,6 +157,7 @@ public class RoomService {
 
     private boolean canUserJoinRoom(User user) {
         int maxCount = user.getRoomMaxCount();
+        // 其实还有个 user.getRoomJoinedCount()，但这只是标记，不用来做判断依据
         int count = (roomMemberRepository.findByUserId(user.getUserId())).size();
         if (count >= maxCount) {
             throw new FormatedException("您已加入" + count + "个房间，达到上限，请先退出已有房间", ErrorCode.Insufficient);
