@@ -1,4 +1,4 @@
-package com.iwxyi.fairyland.Interceptor;
+package com.iwxyi.fairyland.Authentication;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

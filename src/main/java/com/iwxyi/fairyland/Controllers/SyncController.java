@@ -2,9 +2,9 @@ package com.iwxyi.fairyland.Controllers;
 
 import java.util.List;
 
+import com.iwxyi.fairyland.Authentication.LoginRequired;
+import com.iwxyi.fairyland.Authentication.LoginUser;
 import com.iwxyi.fairyland.Exception.GlobalResponse;
-import com.iwxyi.fairyland.Interceptor.LoginRequired;
-import com.iwxyi.fairyland.Interceptor.LoginUser;
 import com.iwxyi.fairyland.Models.SyncBook;
 import com.iwxyi.fairyland.Models.SyncChapter;
 import com.iwxyi.fairyland.Services.SyncBookService;
