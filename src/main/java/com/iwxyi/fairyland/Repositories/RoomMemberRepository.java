@@ -9,6 +9,7 @@ import com.iwxyi.fairyland.Models.RoomMember;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface RoomMemberRepository extends CrudRepository<RoomMember, Long> {
     List<RoomMember> findByRoomId(Long roomId);
@@ -19,7 +20,7 @@ public interface RoomMemberRepository extends CrudRepository<RoomMember, Long> {
     
     @Modifying
     @Transactional
-    @Query("update room_member set intergral = integral + :add where user_id = :userId")
-    void increaseRoomMemberIntegral(Long userId, int add);
+    @Query("update RoomMember rm set rm.integral = rm.integral + :add where rm.userId = :userId")
+    void increaseRoomMemberIntegral(@Param("userId") Long userId, @Param("add") int add);
 
 }

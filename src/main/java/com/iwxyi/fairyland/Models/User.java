@@ -89,8 +89,6 @@ public class User {
     @Min(0)
     private int wordsYesterday;
     @Min(0)
-    private int writeSpeed; // 每小时多少字
-    @Min(0)
     private int codeSpeed; // 码字速度
 
     @Transient // 不存到数据库里
