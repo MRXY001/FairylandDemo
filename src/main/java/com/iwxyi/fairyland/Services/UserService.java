@@ -186,6 +186,10 @@ public class UserService {
         if (prevTime != null && prevTime.getTime() + ConstantValue.NICKNAME_MODIFY_INTERVAL > currTime.getTime()) {
             throw new FormatedException("一周只能修改一次昵称", ErrorCode.FrequencyTime);
         }
+        User nick = userRepository.findByNickname(nickname);
+        if (nick != null) {
+            throw new FormatedException("昵称已存在，请更换", ErrorCode.Exist);
+        }
         user.setNickname(nickname);
         user.setNicknameModifyTime(currTime);
         userRepository.save(user);
