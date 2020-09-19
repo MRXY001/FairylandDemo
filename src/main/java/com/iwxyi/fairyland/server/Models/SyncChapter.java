@@ -1,5 +1,7 @@
 package com.iwxyi.fairyland.server.Models;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,9 +26,9 @@ public class SyncChapter {
     private String title;
     private String content;
     private int chapterType; // 章节种类：0章节（默认）
-    private long createTime = 0L;
-    private long uploadTime = 0L;
-    private long modifyTime = 0L;
+    private Date createTime;
+    private Date uploadTime;
+    private Date modifyTime;
     private int publishState;
     private boolean bookDeleted;
     private boolean deleted;

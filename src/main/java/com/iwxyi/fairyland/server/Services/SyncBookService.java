@@ -1,6 +1,7 @@
 package com.iwxyi.fairyland.server.Services;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.iwxyi.fairyland.server.Config.ErrorCode;
@@ -22,11 +23,11 @@ public class SyncBookService {
     SyncChapterRepository chapterRepository;
 
     public List<SyncBook> getUserBooks(Long userId) {
-        return bookRepository.findByUserIdAndDeleted(userId, false);
+        return bookRepository.findByUserIdAndDeletedFalse(userId);
     }
 
     public List<SyncBook> getUserUpdatedBooks(Long userId, long time) {
-        return bookRepository.findByUserIdAndDeletedAndModifyTimeGreaterThan(userId, false, time);
+        return bookRepository.findByUserIdAndDeletedFalseAndModifyTimeGreaterThan(userId, time);
     }
 
     private SyncBook getBook(Long userId, Long bookIndex) {
@@ -115,24 +116,28 @@ public class SyncBookService {
      * (此时数据不全，需要后续重新上传)
      */
     public SyncBook createBook(SyncBook localBook, Long userId) {
-        localBook.setUploadTime(0);
-        localBook.setModifyTime(0);
+        localBook.setUploadTime(null);
+        localBook.setModifyTime(null);
         localBook.setUserId(userId);
         bookRepository.save(localBook);
         return localBook;
     }
 
-    public SyncBook uploadBookCatalog(Long userId, Long bookIndex, String name, String catalog, long modifyTime) {
+    public SyncBook uploadBookCatalog(Long userId, Long bookIndex, String name, String catalog, Date modifyTime) {
         SyncBook book = getBook(userId, bookIndex);
-        if (book == null) {
-            // *是新作品，创建
-            book = new SyncBook();
-            book.setUserId(userId);
-            book.setBookName(name);
+        if (book == null) { // 根据ID没找到
+            // 根据名字找
+            book = bookRepository.findFirstByBookNameAndUserIdAndDeletedFalse(name, userId);
+            if (book == null) {
+                // *是新作品，创建
+                book = new SyncBook();
+                book.setUserId(userId);
+                book.setBookName(name);
+            }
         }
         book.setCatalog(catalog);
         book.setModifyTime(modifyTime);
-        book.setUploadTime(System.currentTimeMillis());
+        book.setUploadTime(new Date());
         bookRepository.save(book);
         return book;
     }
@@ -185,9 +190,9 @@ public class SyncBookService {
     public void cleanRecycle(Long userId) {
         System.out.println("删除删除" + userId);
         // bookRepository.cleanUserBooks(userId);
-        bookRepository.deleteByUserIdAndDeleted(userId, true);
-        chapterRepository.deleteByUserIdAndDeleted(userId, true);
-        chapterRepository.deleteByUserIdAndBookDeleted(userId, true);
+        bookRepository.deleteByUserIdAndDeletedFalse(userId);
+        chapterRepository.deleteByUserIdAndDeletedTrue(userId);
+        chapterRepository.deleteByUserIdAndBookDeletedTrue(userId);
     }
 
     /**

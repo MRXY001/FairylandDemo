@@ -1,5 +1,6 @@
 package com.iwxyi.fairyland.server.Services;
 
+import java.util.Date;
 import java.util.List;
 
 import com.iwxyi.fairyland.server.Config.ErrorCode;
@@ -49,18 +50,18 @@ public class SyncChapterService {
         return chapterRepository.save(chapter);
     }
     
-    public SyncChapter uploadChapter(Long userId, Long bookIndex, String chapterId, String title, String content, int chapterType, long modifyTime) {
+    public SyncChapter uploadChapter(Long userId, Long bookIndex, String chapterId, String title, String content, int chapterType, Date modifyTime) {
         SyncChapter chapter = getChapterByChapterId(bookIndex, chapterId, userId);
         if (chapter == null) {
             // *创建chapter
             chapter = new SyncChapter(userId, bookIndex, chapterId, title, content);
             chapter.setChapterType(chapterType);
-            chapter.setCreateTime(System.currentTimeMillis());
+            chapter.setCreateTime(new Date());
         }
         chapter.setTitle(title);
         chapter.setContent(content);
         chapter.setModifyTime(modifyTime);
-        chapter.setUploadTime(System.currentTimeMillis());
+        chapter.setUploadTime(new Date());
         return save(chapter);
     }
     

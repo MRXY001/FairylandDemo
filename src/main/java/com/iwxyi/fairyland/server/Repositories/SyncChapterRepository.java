@@ -33,9 +33,9 @@ public interface SyncChapterRepository extends CrudRepository<SyncChapter, Long>
     @Query(value = "update sync_chapter set book_deleted = false where book_index = :bookIndex", nativeQuery = true)
     int restoreBookChapter(Long bookIndex);
 
-    void deleteByUserIdAndDeleted(Long userId, boolean deleted);
+    void deleteByUserIdAndDeletedTrue(Long userId);
 
-    void deleteByUserIdAndBookDeleted(Long userId, boolean deleted);
+    void deleteByUserIdAndBookDeletedTrue(Long userId);
 
     void deleteByBookIndex(Long bookIndex);
 }

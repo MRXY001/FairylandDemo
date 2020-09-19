@@ -29,12 +29,14 @@ public class User {
     private Long userId;
     @NotBlank(message = "用户名不能为空")
     @Length(min = 2, max = 16, message = "用户名长度必须在{min}~{max}之间")
-    @Pattern(regexp = "^\\w[\\w\\d_]{1,15}$", message = "用户名只允许2~16位的大小写字母/数字/下划线，且要求字母开头")
+    // @Pattern(regexp = "^\\w[\\w\\d_]{1,15}$", message = "用户名只允许2~16位的大小写字母/数字/下划线，且要求字母开头")
+    @Pattern(regexp = "^[\\u4e00-\\u9fa5\\w\\d_]{2,16}$", message = "用户名只允许2~16位的汉字/大小写字母/数字/下划线")
     private String username;
     @NotBlank(message = "密码不能为空")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String passwordHash;
     @NotBlank(message = "昵称不能为空")
+    @Pattern(regexp = "^[\\u4e00-\\u9fa5\\w\\d_]{2,16}$", message = "昵称只允许2~16位的汉字/大小写字母/数字/下划线")
     @Length(min = 2, max = 16, message = "昵称长度必须在{min}~{max}之间")
     private String nickname;
     @NotBlank(message = "手机号码不能为空")
@@ -101,17 +103,17 @@ public class User {
     @Min(0)
     private int loginFailedCount; // 出错次数
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Date loginForbidTime = new Date(0);
+    private Date loginForbidTime;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date syncTime = new Date(0);
+    private Date syncTime;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date createTime = new Date(0);
+    private Date createTime;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Date blockTime = new Date(0);
+    private Date blockTime;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Date nicknameModifyTime = new Date(0);
+    private Date nicknameModifyTime;
 
     public User(String username, String passwordHash, String phoneNumber, Date createTime) {
         this.username = username;

@@ -1,5 +1,7 @@
 package com.iwxyi.fairyland.server.Controllers;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import com.iwxyi.fairyland.server.Authentication.LoginRequired;
@@ -109,8 +111,8 @@ public class SyncController {
     public GlobalResponse<?> uploadBookCatalog(@LoginUser Long userId,
             @RequestParam(value = "bookIndex", required = false) final Long bookIndex,
             @RequestParam("name") String name, @RequestParam("catalog") final String catalog,
-            @RequestParam("modifyTime") long modifyTime) {
-        SyncBook book = bookService.uploadBookCatalog(userId, bookIndex, name, catalog, modifyTime);
+            @RequestParam("modifyTime") Long modifyTime) {
+        SyncBook book = bookService.uploadBookCatalog(userId, bookIndex, name, catalog, new Date(modifyTime));
         return GlobalResponse.map("bookIndex", book.getBookIndex());
     }
 
@@ -127,9 +129,9 @@ public class SyncController {
             @RequestParam("bookIndex") final Long bookIndex, @RequestParam("chapterId") final String chapterId,
             @RequestParam("title") final String title, @RequestParam("content") final String content,
             @RequestParam(value = "chapterType", required = false) final int chapterType,
-            @RequestParam("modifyTime") long modifyTime) {
+            @RequestParam("modifyTime") Long modifyTime) {
         SyncChapter chapter = chapterService.uploadChapter(userId, bookIndex, chapterId, title, content, chapterType,
-                modifyTime);
+                new Date(modifyTime));
         return GlobalResponse.map("chapterIndex", chapter.getChapterIndex());
     }
 

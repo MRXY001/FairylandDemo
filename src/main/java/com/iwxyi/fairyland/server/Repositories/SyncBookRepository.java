@@ -13,11 +13,13 @@ public interface SyncBookRepository extends CrudRepository<SyncBook, Long> {
     
     SyncBook findByBookIndexAndUserId(Long bookIndex, Long userId);
 
-    List<SyncBook> findByUserIdAndDeleted(Long userId, boolean notDeleted);
+    SyncBook findFirstByBookNameAndUserIdAndDeletedFalse(String bookName, Long userId);
 
-    List<SyncBook> findByUserIdAndDeletedAndModifyTimeGreaterThan(Long userId, boolean notDeleted, long earlyTime);
+    List<SyncBook> findByUserIdAndDeletedFalse(Long userId);
 
-    void deleteByUserIdAndDeleted(Long userId, boolean deleted);
+    List<SyncBook> findByUserIdAndDeletedFalseAndModifyTimeGreaterThan(Long userId, long earlyTime);
+
+    void deleteByUserIdAndDeletedFalse(Long userId);
     
     void deleteByBookIndex(Long bookIndex);
 }
