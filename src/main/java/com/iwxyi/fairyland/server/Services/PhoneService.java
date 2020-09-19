@@ -3,6 +3,15 @@ package com.iwxyi.fairyland.server.Services;
 import java.util.Date;
 import java.util.List;
 
+import com.aliyuncs.CommonRequest;
+import com.aliyuncs.CommonResponse;
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.IAcsClient;
+import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.exceptions.ServerException;
+import com.aliyuncs.http.MethodType;
+import com.aliyuncs.profile.DefaultProfile;
+import com.iwxyi.fairyland.server.Config.ConstantKey;
 import com.iwxyi.fairyland.server.Config.ConstantValue;
 import com.iwxyi.fairyland.server.Config.ErrorCode;
 import com.iwxyi.fairyland.server.Exception.FormatedException;
@@ -84,7 +93,8 @@ public class PhoneService {
         }
         phoneRepository.save(validation);
 
-        // TODO: 调用API发送验证码
+        // 调用API发送验证码
+        sendCaptcha(number, captcha);
     }
 
     /**
@@ -98,6 +108,9 @@ public class PhoneService {
         PhoneValidation validation = phoneRepository.findFirstByNumberOrderByCreateTimeDesc(number);
         if (validation == null) { // 未检测到这个号码
             throw new FormatedException("未发送" + number + "的验证码", ErrorCode.Invalid);
+        }
+        if (validation.isVerified() && validation.getCreateTime().getTime() + ConstantValue.PHONE_VALIDATION_VALID < (new Date()).getTime()) {
+            throw new FormatedException("请发送手机验证码", ErrorCode.Invalid);
         }
         if (validation.isVerified()) { // 已经使用过的验证码
             throw new FormatedException("请重新发送验证码", ErrorCode.Retry);
@@ -120,5 +133,30 @@ public class PhoneService {
         validation.setFailCount(validation.getFailCount() + 1);
         phoneRepository.save(validation);
         throw new FormatedException("请输入正确的验证码", ErrorCode.Incorrect);
+    }
+
+    private void sendCaptcha(String number, String code) {
+        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", ConstantKey.ALIYUN_ACCESS_KEY_ID,
+                ConstantKey.ALIYUN_ACCESS_KEY_SECRET);
+        IAcsClient client = new DefaultAcsClient(profile);
+
+        CommonRequest request = new CommonRequest();
+        request.setSysMethod(MethodType.POST);
+        request.setSysDomain("dysmsapi.aliyuncs.com");
+        request.setSysVersion("2017-05-25");
+        request.setSysAction("SendSms");
+        request.putQueryParameter("RegionId", "cn-hangzhou");
+        request.putQueryParameter("PhoneNumbers", number);
+        request.putQueryParameter("SignName", "写作天下");
+        request.putQueryParameter("TemplateCode", "SMS_202817872");
+        request.putQueryParameter("TemplateParam", "{\"code\":"+code+"}");
+        try {
+            CommonResponse response = client.getCommonResponse(request);
+            System.out.println(response.getData());
+        } catch (ServerException e) {
+            e.printStackTrace();
+        } catch (ClientException e) {
+            e.printStackTrace();
+        }
     }
 }
