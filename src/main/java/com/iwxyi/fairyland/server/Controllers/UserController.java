@@ -1,16 +1,22 @@
 package com.iwxyi.fairyland.server.Controllers;
 
+import java.sql.Timestamp;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
 
 import com.iwxyi.fairyland.server.Authentication.LoginRequired;
 import com.iwxyi.fairyland.server.Authentication.LoginUser;
+import com.iwxyi.fairyland.server.Config.ErrorCode;
+import com.iwxyi.fairyland.server.Exception.FormatedException;
 import com.iwxyi.fairyland.server.Exception.GlobalResponse;
+import com.iwxyi.fairyland.server.Models.Coupon;
 import com.iwxyi.fairyland.server.Models.User;
 import com.iwxyi.fairyland.server.Services.LoginService;
 import com.iwxyi.fairyland.server.Services.MailService;
 import com.iwxyi.fairyland.server.Services.PhoneService;
 import com.iwxyi.fairyland.server.Services.UserService;
+import com.iwxyi.fairyland.server.Services.VipPaymentService;
 import com.iwxyi.fairyland.server.Tools.IpUtil;
 import com.iwxyi.fairyland.server.Tools.TokenUtil;
 
@@ -39,13 +45,15 @@ public class UserController {
     @Autowired
     private LoginService loginService;
     @Autowired
+    private VipPaymentService vipPaymentService;
+    @Autowired
     private HttpServletRequest request;
 
     Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    /*****************************************************************************************
-     *                                           账号
-     *****************************************************************************************/
+    /* -------------------------------------------------------------------------- */
+    /*                                     账号                                     */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * 用户注册
@@ -168,18 +176,26 @@ public class UserController {
         return GlobalResponse.success("通过token验证");
     }
 
-    /*****************************************************************************************
-     *                                           积分
-     *****************************************************************************************/
+    /* -------------------------------------------------------------------------- */
+    /*                                     积分                                     */
+    /* -------------------------------------------------------------------------- */
 
+    /**
+     * 增加用户的一些小积分项
+     * 不会超额太多
+     */
     @RequestMapping("/increaseIntegral")
     @LoginRequired
     public GlobalResponse<?> uploadIntegral(@LoginUser User user, @RequestParam("words") int words,
-            @RequestParam("times") int times, @RequestParam("useds") int useds, @RequestParam("bonus") int bonus, @RequestParam("speed") Integer speed) {
+            @RequestParam("times") int times, @RequestParam("useds") int useds, @RequestParam("bonus") int bonus,
+            @RequestParam("speed") Integer speed) {
         user = userService.increaseIntegral(user, words, times, useds, bonus, speed);
         return GlobalResponse.success(user);
     }
 
+    /**
+     * 查看所有的排名
+     */
     @RequestMapping("/rank")
     @ResponseBody
     public GlobalResponse<?> rank(@RequestParam(value = "pageNumber", required = false) Integer pageNumber) {
@@ -190,5 +206,49 @@ public class UserController {
         // 排序方式，这里以等级进行排序
         Page<User> users = userService.pagedRank(pageNumber - 1, 20, Sort.by(Sort.Direction.DESC, "level"));
         return GlobalResponse.success(users);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                                     支付                                     */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+     * 查看优惠券信息
+     */
+    @RequestMapping("/couponInfo")
+    @ResponseBody
+    @LoginRequired
+    public GlobalResponse<?> couponInfo(@RequestParam("couponCode") String couponCode) {
+        Coupon coupon = vipPaymentService.getCoupon(couponCode);
+        if (coupon == null) {
+            throw new FormatedException("未找到优惠券", ErrorCode.NotExist);
+        } else if (coupon.isValid()) {
+            throw new FormatedException("优惠券已失效", ErrorCode.Overdue);
+        } else if (coupon.isAllUsed()) {
+            throw new FormatedException("优惠券已被使用", ErrorCode.Insufficient);
+        }
+        return GlobalResponse.success(coupon);
+    }
+
+    /**
+     * 支付平台的回调
+     * 具体参数根据其平台的API进行调整
+     * @param user 支付的用户（允许为其他用户，即给别人付款）
+     * @param paymentAmount 支付金额
+     * @param originalAmount 不含优惠券与其它优惠的原价
+     * @param couponCode 优惠券
+     * @param days 购买的真实天数（包括免费送的）
+     * @param paymentTime 支付时间（肯定比现在的早）
+     * @return
+     */
+    @RequestMapping("/paypaypayCallback") // !这个API需要改得复杂一点，免得被攻击
+    @ResponseBody
+    @LoginRequired
+    public GlobalResponse<?> payCallback(@LoginUser User user, @RequestParam("paymentAmount") double paymentAmount,
+            @RequestParam("originalAmount") double originalAmount, @RequestParam("couponCode") String couponCode,
+            @RequestParam("days") Integer days, @RequestParam("paymentTime") Timestamp paymentTime) {
+        user = vipPaymentService.savePayment(user, paymentAmount, originalAmount, couponCode, days, paymentTime,
+                new Timestamp(System.currentTimeMillis()));
+        return GlobalResponse.map("vipDeadline", user.getVipDeadline());
     }
 }

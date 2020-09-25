@@ -95,6 +95,7 @@ public class User {
 
     @Transient // 不存到数据库里
     private boolean vip; // 是否是VIP
+    private Date vipDeadline; // VIP到期时间
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Min(0)
     private double totalPay; // 总共付了多少钱（实付）

@@ -12,6 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 记录客户端的使用数据，包括但不限于：
+ * - 启动记录
+ * - 用户反馈（需要登录）
+ * - 小黑屋
+ */
+
 @RestController
 @RequestMapping(value = "/server/usage", produces = "application/json;charset=UTF-8")
 @CrossOrigin(allowCredentials = "true", allowedHeaders = "*")

@@ -33,11 +33,13 @@ public class VipPayment {
     @NotNull
     private Date createTime; // 创建时间，应该比创建时间晚一点
 
-    public VipPayment(Long userId, double paymentAmount, double originalAmount, int days, Date paymentTime, Date createTime) {
+    public VipPayment(Long userId, double paymentAmount, double originalAmount, int days, Long couponId, Date paymentTime,
+            Date createTime) {
         this.userId = userId;
         this.paymentAmount = paymentAmount;
         this.originalAmount = originalAmount;
         this.days = days;
+        this.couponId = couponId;
         this.paymentTime = paymentTime;
         this.createTime = createTime;
     }
