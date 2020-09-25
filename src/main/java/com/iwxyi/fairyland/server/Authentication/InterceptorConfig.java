@@ -15,8 +15,9 @@ public class InterceptorConfig extends WebMvcConfigurationSupport {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        String[] addPath = { "/**" };
+        String[] addPath = { "/server/**" }; // 只拦截一部分
         String[] excludePath = {};
+        // 拦截器添加的顺序就是执行顺序
         registry.addInterceptor(authenticationInterceptor()).addPathPatterns(addPath).excludePathPatterns(excludePath);
     }
 
