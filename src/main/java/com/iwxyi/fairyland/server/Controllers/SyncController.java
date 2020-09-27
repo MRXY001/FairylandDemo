@@ -1,6 +1,5 @@
 package com.iwxyi.fairyland.server.Controllers;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -61,7 +60,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> downloadUpdatedBooks(@LoginUser Long userId,
-            @RequestParam("syncTime") final long syncTime) {
+            @RequestParam("syncTime") final Long syncTime) {
         // #返回有更新的目录列表索引
         List<SyncBook> syncBooks = bookService.getUserUpdatedBooks(userId, syncTime);
         return GlobalResponse.map("books", syncBooks);
@@ -80,7 +79,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> downloadUpdatedChapters(@LoginUser Long userId,
-            @RequestParam("syncTime") final long syncTime) {
+            @RequestParam("syncTime") final Long syncTime) {
         // #返回有更新的章节列表
         List<SyncChapter> syncChapters = chapterService.getUserUpdatedChapters(userId, syncTime);
         return GlobalResponse.map("chapters", syncChapters);
