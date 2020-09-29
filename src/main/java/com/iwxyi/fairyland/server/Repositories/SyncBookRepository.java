@@ -1,5 +1,6 @@
 package com.iwxyi.fairyland.server.Repositories;
 
+import java.util.Date;
 import java.util.List;
 
 import com.iwxyi.fairyland.server.Models.SyncBook;
@@ -17,7 +18,7 @@ public interface SyncBookRepository extends CrudRepository<SyncBook, Long> {
 
     List<SyncBook> findByUserIdAndDeletedFalse(Long userId);
 
-    List<SyncBook> findByUserIdAndDeletedFalseAndModifyTimeGreaterThan(Long userId, long earlyTime);
+    List<SyncBook> findByUserIdAndDeletedFalseAndModifyTimeGreaterThan(Long userId, Date earlyTime);
 
     void deleteByUserIdAndDeletedFalse(Long userId);
     

@@ -1,5 +1,6 @@
 package com.iwxyi.fairyland.server.Repositories;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -21,7 +22,7 @@ public interface SyncChapterRepository extends CrudRepository<SyncChapter, Long>
             boolean bookExist, long time);
 
     List<SyncChapter> findByUserIdAndBookIndexAndDeletedAndBookDeletedAndModifyTimeGreaterThan(Long userId,
-            Long bookIndex, boolean notDeleted, boolean bookExist, long time);
+            Long bookIndex, boolean notDeleted, boolean bookExist, Date time);
 
     @Transactional // 事务
     @Modifying // 增删改必须有这个注解

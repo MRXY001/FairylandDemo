@@ -10,6 +10,8 @@ import com.iwxyi.fairyland.server.Models.SyncBook;
 import com.iwxyi.fairyland.server.Repositories.SyncBookRepository;
 import com.iwxyi.fairyland.server.Repositories.SyncChapterRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +23,15 @@ public class SyncBookService {
     SyncBookRepository bookRepository;
     @Autowired
     SyncChapterRepository chapterRepository;
+    
+    Logger logger = LoggerFactory.getLogger(SyncBookService.class);
 
     public List<SyncBook> getUserBooks(Long userId) {
         return bookRepository.findByUserIdAndDeletedFalse(userId);
     }
 
     public List<SyncBook> getUserUpdatedBooks(Long userId, long time) {
-        return bookRepository.findByUserIdAndDeletedFalseAndModifyTimeGreaterThan(userId, time);
+        return bookRepository.findByUserIdAndDeletedFalseAndModifyTimeGreaterThan(userId, new Date(time));
     }
 
     private SyncBook getBook(Long userId, Long bookIndex) {
@@ -52,7 +56,7 @@ public class SyncBookService {
         // #先匹配客户端有ID的情况，最优先
         for (int i = 0; i < localBooks.size(); i++) {
             SyncBook localBook = localBooks.get(i);
-            if (localBook.getBookIndex() == null) {
+            if (!localBook.hasBookIndex()) {
                 continue;
             }
             SyncBook cloudBook = null;
@@ -61,6 +65,7 @@ public class SyncBookService {
                 if (cloudBooks.get(j).getBookIndex() == localBook.getBookIndex()) {
                     // ID 一模一样，那就是这本书了！
                     cloudBook = cloudBooks.get(j);
+                    logger.info("匹配ID：" + localBook.getBookName());
                     // ?可能书名不一样，另一设备客户端重命名，导致书名不一样
                     // *客户端需要额外判断ID的情况，有必要时进行重命名
                     responseBooks.add(cloudBook);
@@ -73,6 +78,7 @@ public class SyncBookService {
             if (cloudBook == null) { // 没有找到云端的，但是客户端有ID？
                 // 不用管它，可能是其他设备已经删除云端，就当做它不存在啦
                 // ?当然也有可能是用户自己随便改了个ID，这本书不是该用户的
+                logger.info("未找到本地ID：" + localBook.getBookName() + ", id:" + localBook.getBookIndex());
                 localBooks.remove(i--);
             }
         }
@@ -86,6 +92,7 @@ public class SyncBookService {
                 if (cloudBook.getBookName().equals(localBooks.get(j).getBookName())) {
                     // 名字一样，就是这本书了！
                     localBook = localBooks.get(j);
+                    logger.info("设置ID：" + localBook.getBookName());
                     // *需要在客户端设置bookIndex
                     responseBooks.add(cloudBook);
                     cloudBooks.remove(i--);
@@ -105,9 +112,11 @@ public class SyncBookService {
             SyncBook localBook = localBooks.get(i);
             // *创建云端新书
             SyncBook cloudBook = createBook(localBook, userId);
+            logger.info("创建新书：" + localBook.getBookName());
             // 返回云端创建的对象
             responseBooks.add(cloudBook);
         }
+        
         return responseBooks;
     }
 

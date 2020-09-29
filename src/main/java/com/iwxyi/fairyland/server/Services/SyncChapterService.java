@@ -29,7 +29,7 @@ public class SyncChapterService {
 
     public List<SyncChapter> getBookUpdatedChapters(Long userId, Long bookIndex, long timestamp) {
         return chapterRepository.findByUserIdAndBookIndexAndDeletedAndBookDeletedAndModifyTimeGreaterThan(userId,
-                bookIndex, false, false, timestamp);
+                bookIndex, false, false, new Date(timestamp));
     }
 
     public SyncChapter getChapterByChapterIndex(Long chapterIndex, Long bookIndex, Long userId) {

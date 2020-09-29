@@ -12,6 +12,8 @@ import com.iwxyi.fairyland.server.Services.SyncBookService;
 import com.iwxyi.fairyland.server.Services.SyncChapterService;
 import com.iwxyi.fairyland.server.Services.UserService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +33,8 @@ public class SyncController {
     SyncBookService bookService;
     @Autowired
     SyncChapterService chapterService;
+
+    Logger logger = LoggerFactory.getLogger(SyncBookService.class);
 
     /**
      * #云同步第一步：准备进行同步，进行ID的匹配等等

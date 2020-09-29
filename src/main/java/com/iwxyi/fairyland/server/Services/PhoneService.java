@@ -109,7 +109,8 @@ public class PhoneService {
         if (validation == null) { // 未检测到这个号码
             throw new FormatedException("未发送" + number + "的验证码", ErrorCode.Invalid);
         }
-        if (validation.isVerified() && validation.getCreateTime().getTime() + ConstantValue.PHONE_VALIDATION_VALID < (new Date()).getTime()) {
+        if (validation.isVerified() && validation.getCreateTime().getTime()
+                + ConstantValue.PHONE_VALIDATION_VALID < (new Date()).getTime()) {
             throw new FormatedException("请发送手机验证码", ErrorCode.Invalid);
         }
         if (validation.isVerified()) { // 已经使用过的验证码
@@ -136,6 +137,11 @@ public class PhoneService {
     }
 
     private void sendCaptcha(String number, String code) {
+        if (ConstantKey.ALIYUN_ACCESS_KEY_ID.isEmpty()) {
+            System.out.println("短信验证码 ALIYUN_ACCESS_KEY_ID 为空，假装发送了：" + code);
+            return;
+        }
+
         DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", ConstantKey.ALIYUN_ACCESS_KEY_ID,
                 ConstantKey.ALIYUN_ACCESS_KEY_SECRET);
         IAcsClient client = new DefaultAcsClient(profile);
@@ -149,7 +155,7 @@ public class PhoneService {
         request.putQueryParameter("PhoneNumbers", number);
         request.putQueryParameter("SignName", "写作天下");
         request.putQueryParameter("TemplateCode", "SMS_202817872");
-        request.putQueryParameter("TemplateParam", "{\"code\":"+code+"}");
+        request.putQueryParameter("TemplateParam", "{\"code\":" + code + "}");
         try {
             CommonResponse response = client.getCommonResponse(request);
             System.out.println(response.getData());
