@@ -23,13 +23,15 @@ public class SyncChapterService {
     }
 
     public List<SyncChapter> getUserUpdatedChapters(Long userId, long timestamp) {
-        return chapterRepository.findByUserIdAndDeletedAndBookDeletedAndModifyTimeGreaterThan(userId, false, false, timestamp);
+        return chapterRepository.findByUserIdAndDeletedAndBookDeletedAndModifyTimeGreaterThan(userId, false, false,
+                timestamp);
     }
-    
+
     public List<SyncChapter> getBookUpdatedChapters(Long userId, Long bookIndex, long timestamp) {
-        return chapterRepository.findByUserIdAndBookIndexAndDeletedAndBookDeletedAndModifyTimeGreaterThan(userId, bookIndex, false, false, timestamp);
+        return chapterRepository.findByUserIdAndBookIndexAndDeletedAndBookDeletedAndModifyTimeGreaterThan(userId,
+                bookIndex, false, false, timestamp);
     }
-    
+
     public SyncChapter getChapterByChapterIndex(Long chapterIndex, Long bookIndex, Long userId) {
         SyncChapter chapter = chapterRepository.findByChapterIndex(chapterIndex);
         if (chapter != null) {
@@ -40,7 +42,7 @@ public class SyncChapterService {
         }
         return chapter;
     }
-    
+
     public SyncChapter getChapterByChapterId(Long bookIndex, String chapterId, Long userId) {
         SyncChapter chapter = chapterRepository.findFirstByUserIdAndBookIndexAndChapterId(userId, bookIndex, chapterId);
         return chapter;
@@ -49,8 +51,9 @@ public class SyncChapterService {
     public SyncChapter save(SyncChapter chapter) {
         return chapterRepository.save(chapter);
     }
-    
-    public SyncChapter uploadChapter(Long userId, Long bookIndex, String chapterId, String title, String content, int chapterType, Date modifyTime) {
+
+    public SyncChapter uploadChapter(Long userId, Long bookIndex, String chapterId, String title, String content,
+            int chapterType, Date modifyTime) {
         SyncChapter chapter = getChapterByChapterId(bookIndex, chapterId, userId);
         if (chapter == null) {
             // *创建chapter
@@ -58,13 +61,15 @@ public class SyncChapterService {
             chapter.setChapterType(chapterType);
             chapter.setCreateTime(new Date());
         }
-        chapter.setTitle(title);
+        if (title != null && title.length() > 0) {
+            chapter.setTitle(title);
+        }
         chapter.setContent(content);
         chapter.setModifyTime(modifyTime);
         chapter.setUploadTime(new Date());
         return save(chapter);
     }
-    
+
     public void renameChapter(Long userId, Long bookIndex, String chapterId, String newName) {
         SyncChapter chapter = chapterRepository.findFirstByUserIdAndBookIndexAndChapterId(userId, bookIndex, chapterId);
         if (chapter == null) {
@@ -76,7 +81,7 @@ public class SyncChapterService {
         chapter.setTitle(newName);
         chapterRepository.save(chapter);
     }
-    
+
     public void deleteChapter(Long userId, Long bookIndex, String chapterId) {
         SyncChapter chapter = chapterRepository.findFirstByUserIdAndBookIndexAndChapterId(userId, bookIndex, chapterId);
         if (chapter == null) {

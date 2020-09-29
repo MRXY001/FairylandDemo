@@ -39,7 +39,7 @@ public class SyncBookService {
         }
         return book;
     }
-    
+
     /**
      * 本地数据和云端的数据进行匹配
      * *该新建的新建，该重命名的重命名，改设置ID的设置ID
@@ -124,8 +124,12 @@ public class SyncBookService {
     }
 
     public SyncBook uploadBookCatalog(Long userId, Long bookIndex, String name, String catalog, Date modifyTime) {
-        boolean exist = true;
-        SyncBook book = getBook(userId, bookIndex);
+        boolean exist = true; // 是否是已经存在的作品
+        SyncBook book = null;
+        // (上传为0可能是客户端懒得判断……)
+        if (bookIndex != null && bookIndex > 0) {
+            book = getBook(userId, bookIndex); // 要是客户端把ID乱改的话，不一定找得到
+        }
         if (book == null) { // 根据ID没找到
             exist = false;
             // 根据名字找
