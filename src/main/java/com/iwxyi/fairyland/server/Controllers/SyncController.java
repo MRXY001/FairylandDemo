@@ -63,7 +63,16 @@ public class SyncController {
             @RequestParam("syncTime") final Long syncTime) {
         // #返回有更新的目录列表索引
         List<SyncBook> syncBooks = bookService.getUserUpdatedBooks(userId, syncTime);
-        return GlobalResponse.map("books", syncBooks);
+        List<SyncChapter> syncChapters = null;
+        List<SyncBook> bookList = null;
+        if (syncTime != null && syncTime > 0) {
+            // 一次性下载
+            syncChapters = chapterService.getUserUpdatedChapters(userId, syncTime);
+        } else {
+            // 只给出更新的作品
+            bookList = syncBooks;
+        }
+        return GlobalResponse.map("books", syncBooks, "chapters", syncChapters, "bookList", bookList);
     }
 
     /**
@@ -87,7 +96,7 @@ public class SyncController {
 
     /**
      * #云同步第三步（分）：获取每一本书的正文
-     * (用于解决作品数量过多，导致返回结果太大的问题)
+     * (一般就几M，用于解决作品数量过多，导致返回结果太大的问题)
      * 建议初次同步时使用，逐书下载
      */
     @PostMapping(value = "/downloadBookUpdatedChapters")
@@ -111,8 +120,9 @@ public class SyncController {
             @RequestParam(value = "bookIndex", required = false) final Long bookIndex,
             @RequestParam("name") String name, @RequestParam("catalog") final String catalog,
             @RequestParam("modifyTime") Long modifyTime) {
-        SyncBook book = bookService.uploadBookCatalog(userId, bookIndex, name, catalog, new Date(modifyTime));
-        return GlobalResponse.map("bookIndex", book.getBookIndex());
+        SyncBook createdBook = bookService.uploadBookCatalog(userId, bookIndex, name, catalog, new Date(modifyTime));
+        // 如果是新建的作品，则返回对应的bookIndex
+        return GlobalResponse.map("bookIndex", createdBook == null ? null : createdBook.getBookIndex());
     }
 
     /**

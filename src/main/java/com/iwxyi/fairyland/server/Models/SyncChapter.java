@@ -23,8 +23,8 @@ public class SyncChapter {
     private Long userId;
     private String chapterId; // 这个是作品内章节唯一ID，后台不使用这个
     @Length(min = 1, max = 20, message = "章节名不能超过20个字")
-    private String title;
-    private String content;
+    private String title; // 标题名字
+    private String content; // 正文内容
     private int chapterType; // 章节种类：0章节（默认）
     private Date createTime;
     private Date uploadTime;

@@ -116,7 +116,7 @@ public class SyncBookService {
      * (此时数据不全，需要后续重新上传)
      */
     public SyncBook createBook(SyncBook localBook, Long userId) {
-        localBook.setUploadTime(null);
+        localBook.setUploadTime(new Date());
         localBook.setModifyTime(null);
         localBook.setUserId(userId);
         bookRepository.save(localBook);
@@ -124,8 +124,10 @@ public class SyncBookService {
     }
 
     public SyncBook uploadBookCatalog(Long userId, Long bookIndex, String name, String catalog, Date modifyTime) {
+        boolean exist = true;
         SyncBook book = getBook(userId, bookIndex);
         if (book == null) { // 根据ID没找到
+            exist = false;
             // 根据名字找
             book = bookRepository.findFirstByBookNameAndUserIdAndDeletedFalse(name, userId);
             if (book == null) {
@@ -139,7 +141,7 @@ public class SyncBookService {
         book.setModifyTime(modifyTime);
         book.setUploadTime(new Date());
         bookRepository.save(book);
-        return book;
+        return exist ? null : book;
     }
 
     public void renameBook(Long userId, Long bookIndex, String newName) {
