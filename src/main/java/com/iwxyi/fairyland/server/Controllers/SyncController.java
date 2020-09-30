@@ -1,5 +1,6 @@
 package com.iwxyi.fairyland.server.Controllers;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -74,9 +75,14 @@ public class SyncController {
             syncChapters = chapterService.getUserUpdatedChapters(userId, syncTime);
         } else {
             // 只给出更新的作品
-            bookList = syncBooks;
+            bookList = new ArrayList<SyncBook>();
+            for (int i = 0; i < syncBooks.size(); i++) {
+                if (syncBooks.get(i).getModifyTime() != null && syncBooks.get(i).getModifyTime().getTime() > syncTime) {
+                    bookList.add(syncBooks.get(i));
+                }
+            }
         }
-        return GlobalResponse.map("books", syncBooks, "chapters", syncChapters, "bookList", bookList);
+        return GlobalResponse.map("books", syncBooks, "chapters", syncChapters, "bookList", syncBooks);
     }
 
     /**
