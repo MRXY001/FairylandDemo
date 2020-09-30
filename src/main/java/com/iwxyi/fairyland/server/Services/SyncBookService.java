@@ -23,7 +23,7 @@ public class SyncBookService {
     SyncBookRepository bookRepository;
     @Autowired
     SyncChapterRepository chapterRepository;
-    
+
     Logger logger = LoggerFactory.getLogger(SyncBookService.class);
 
     public List<SyncBook> getUserBooks(Long userId) {
@@ -116,7 +116,7 @@ public class SyncBookService {
             // 返回云端创建的对象
             responseBooks.add(cloudBook);
         }
-        
+
         return responseBooks;
     }
 
@@ -126,6 +126,7 @@ public class SyncBookService {
      */
     public SyncBook createBook(SyncBook localBook, Long userId) {
         localBook.setUploadTime(new Date());
+        localBook.setUpdateTime(new Date());
         localBook.setModifyTime(null);
         localBook.setUserId(userId);
         bookRepository.save(localBook);
@@ -153,6 +154,7 @@ public class SyncBookService {
         book.setCatalog(catalog);
         book.setModifyTime(modifyTime);
         book.setUploadTime(new Date());
+        book.refreshUpdateTime(modifyTime);
         bookRepository.save(book);
         return exist ? null : book;
     }
@@ -166,6 +168,7 @@ public class SyncBookService {
             throw new FormatedException("无法操作非自己的作品", ErrorCode.User);
         }
         book.setBookName(newName);
+        book.refreshUpdateTime(new Date());
         bookRepository.save(book);
     }
 
@@ -178,6 +181,7 @@ public class SyncBookService {
             throw new FormatedException("无法操作非自己的作品", ErrorCode.User);
         }
         book.setDeleted(true);
+        book.refreshUpdateTime(new Date());
         bookRepository.save(book);
 
         // 删除这本书的所有章节
@@ -193,6 +197,7 @@ public class SyncBookService {
             throw new FormatedException("无法操作非自己的作品", ErrorCode.User);
         }
         book.setDeleted(false);
+        book.refreshUpdateTime(new Date());
         bookRepository.save(book);
 
         // 删除这本书的所有章节

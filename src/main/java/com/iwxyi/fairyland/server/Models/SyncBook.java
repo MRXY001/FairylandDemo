@@ -29,13 +29,19 @@ public class SyncBook {
     private String bookName;
     private String catalog; // 目录正文
     private int publishState; // 0不发布，1仅为好友可见，2全部公开
-    private Date createTime;
-    private Date uploadTime;
-    private Date modifyTime;
+    private Date createTime; // 创建时间（云端为准）
+    private Date uploadTime; // 上传时间（云端为准）
+    private Date modifyTime; // 修改时间（客户端为准）
+    private Date updateTime; // 更新时间：包括目录增删改、章节修改时间
     private boolean deleted;
 
-    public boolean hasBookIndex()
-    {
+    public boolean hasBookIndex() {
         return bookIndex != null && bookIndex > 0;
+    }
+
+    public void refreshUpdateTime(Date time) {
+        if (updateTime == null || (time != null && time.getTime() > updateTime.getTime())) {
+            setUpdateTime(time);
+        }
     }
 }
