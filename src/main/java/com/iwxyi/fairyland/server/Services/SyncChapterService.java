@@ -1,5 +1,6 @@
 package com.iwxyi.fairyland.server.Services;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -104,5 +105,31 @@ public class SyncChapterService {
         }
         chapter.setDeleted(false);
         chapterRepository.save(chapter);
+    }
+
+    public void deleteChapters(Long bookIndex, String[] chapters) {
+        List<String> ids = Arrays.asList(chapters);
+        chapterRepository.deleteBookChapters(bookIndex, ids);
+
+        /* for (int i = 0; i < chapters.length; i++) {
+            SyncChapter chapter = chapterRepository.findByBookIndexAndChapterId(bookIndex, chapters[i]);
+            if (chapter != null) {
+                chapter.setDeleted(true);
+                chapterRepository.save(chapter);
+            }
+        } */
+    }
+
+    public void restoreChapters(Long bookIndex, String[] chapters) {
+        List<String> ids = Arrays.asList(chapters);
+        chapterRepository.restoreBookChapters(bookIndex, ids);
+
+        /* for (int i = 0; i < chapters.length; i++) {
+            SyncChapter chapter = chapterRepository.findByBookIndexAndChapterId(bookIndex, chapters[i]);
+            if (chapter != null) {
+                chapter.setDeleted(false);
+                chapterRepository.save(chapter);
+            }
+        } */
     }
 }

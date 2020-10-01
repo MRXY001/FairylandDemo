@@ -31,10 +31,10 @@ public class SyncBookService {
     }
 
     public List<SyncBook> getUserUpdatedBooks(Long userId, long time) {
-        return bookRepository.findByUserIdAndDeletedFalseAndModifyTimeGreaterThan(userId, new Date(time));
+        return bookRepository.findByUserIdAndDeletedFalseAndUpdateTimeGreaterThan(userId, new Date(time));
     }
 
-    private SyncBook getBook(Long userId, Long bookIndex) {
+    public SyncBook getBook(Long userId, Long bookIndex) {
         SyncBook book = bookRepository.findByBookIndex(bookIndex);
         if (book != null && book.getUserId() != userId) {
             // ?这本书不是这个用户的？可能是用户好奇手动改的ID
@@ -127,6 +127,7 @@ public class SyncBookService {
     public SyncBook createBook(SyncBook localBook, Long userId) {
         localBook.setUploadTime(new Date());
         localBook.setUpdateTime(new Date());
+        localBook.setCreateTime(new Date());
         localBook.setModifyTime(null);
         localBook.setUserId(userId);
         bookRepository.save(localBook);
@@ -225,5 +226,11 @@ public class SyncBookService {
         }
         bookRepository.deleteByBookIndex(bookIndex);
         chapterRepository.deleteByBookIndex(bookIndex);
+    }
+
+    public void refreshBookUpdateTime(Long bookIndex, Long modifyTime) {
+        SyncBook book = bookRepository.findByBookIndex(bookIndex);
+        book.refreshUpdateTime(new Date(modifyTime));
+        bookRepository.save(book);
     }
 }

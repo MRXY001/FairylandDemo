@@ -162,7 +162,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> renameBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
-            @RequestParam("newName") String newName) {
+            @RequestParam("newName") String newName, @RequestParam("modifyTime") Long modifyTime) {
         bookService.renameBook(userId, bookIndex, newName);
         return GlobalResponse.success();
     }
@@ -175,8 +175,10 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> renameChapter(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
-            @RequestParam("chapterId") String chapterId, @RequestParam("newName") String newName) {
+            @RequestParam("chapterId") String chapterId, @RequestParam("newName") String newName,
+            @RequestParam("modifyTime") Long modifyTime) {
         chapterService.renameChapter(userId, bookIndex, chapterId, newName);
+        bookService.refreshBookUpdateTime(bookIndex, modifyTime);
         return GlobalResponse.success();
     }
 
@@ -187,7 +189,8 @@ public class SyncController {
     @PostMapping(value = "/deleteBook")
     @ResponseBody
     @LoginRequired
-    public GlobalResponse<?> deleteBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
+    public GlobalResponse<?> deleteBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
+            @RequestParam("modifyTime") Long modifyTime) {
         bookService.deleteBook(userId, bookIndex);
         return GlobalResponse.success();
     }
@@ -196,7 +199,7 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> deleteChapter(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
-            @RequestParam("chapterId") String chapterId) {
+            @RequestParam("chapterId") String chapterId, @RequestParam("modifyTime") Long modifyTime) {
         chapterService.deleteChapter(userId, bookIndex, chapterId);
         return GlobalResponse.success();
     }
@@ -204,7 +207,8 @@ public class SyncController {
     @PostMapping(value = "/restoreBook")
     @ResponseBody
     @LoginRequired
-    public GlobalResponse<?> restoreBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex) {
+    public GlobalResponse<?> restoreBook(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
+            @RequestParam("modifyTime") Long modifyTime) {
         bookService.restoreBook(userId, bookIndex);
         return GlobalResponse.success();
     }
@@ -213,8 +217,36 @@ public class SyncController {
     @ResponseBody
     @LoginRequired
     public GlobalResponse<?> restoreChapter(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
-            @RequestParam("chapterId") String chapterId) {
+            @RequestParam("chapterId") String chapterId, @RequestParam("modifyTime") Long modifyTime) {
         chapterService.restoreChapter(userId, bookIndex, chapterId);
+        return GlobalResponse.success();
+    }
+
+    @PostMapping(value = "/deleteChapters")
+    @ResponseBody
+    @LoginRequired
+    public GlobalResponse<?> deleteChapters(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
+            @RequestParam("chapters") String chapters) {
+        // 验证是否是这个用户的作品
+        bookService.getBook(userId, bookIndex);
+        // 批量删除章节
+        String list[] = chapters.split("\n");
+        chapterService.deleteChapters(bookIndex, list);
+
+        return GlobalResponse.success();
+    }
+
+    @PostMapping(value = "/restoreChapters")
+    @ResponseBody
+    @LoginRequired
+    public GlobalResponse<?> restoreChapters(@LoginUser Long userId, @RequestParam("bookIndex") Long bookIndex,
+            @RequestParam("chapters") String chapters) {
+        // 验证是否是这个用户的作品
+        String list[] = chapters.split("\n");
+        // 批量删除章节
+        bookService.getBook(userId, bookIndex);
+        chapterService.restoreChapters(bookIndex, list);
+
         return GlobalResponse.success();
     }
 
