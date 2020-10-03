@@ -206,6 +206,16 @@ public class UserService {
         user.setPasswordHash(passwordHash);
         userRepository.save(user);
     }
+    
+    public void validUserPhoneNumber(String username, String phoneNumber) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new FormatedException("未找到该用户", ErrorCode.NotExist);
+        }
+        if (user.getPhoneNumber().equals(phoneNumber)) {
+            throw new FormatedException("手机号错误", ErrorCode.Incorrect);
+        }
+    }
 
     public void setPassword(User user, String password) {
         // 密码hash

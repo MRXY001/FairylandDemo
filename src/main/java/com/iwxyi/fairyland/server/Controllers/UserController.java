@@ -94,12 +94,26 @@ public class UserController {
     }
 
     /**
-     * 发送手机验证
+     * 发送手机验证（免登录）
      */
     @RequestMapping("/sendPhoneValidation")
     public GlobalResponse<?> sendPhoneValidation(@RequestParam("phoneNumber") String phoneNumber,
-            @RequestParam(value = "cpuId", required = false) String cpuId) {
-        phoneService.sendCaptcha(phoneNumber, IpUtil.getIpAddr(request), cpuId);
+            @RequestParam(value = "cpuId", required = false) String cpuId,
+            @RequestParam(value = "message", required = false) String message) {
+        phoneService.sendCaptcha(phoneNumber, IpUtil.getIpAddr(request), cpuId, message);
+        return GlobalResponse.success();
+    }
+
+    /**
+     * 忘记密码，发送手机号验证
+     * 需要用户名与手机号匹配
+     */
+    @RequestMapping("/sendUserPhoneValidation")
+    public GlobalResponse<?> sendUserPhoneValidation(@RequestParam("username") String username, @RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam(value = "cpuId", required = false) String cpuId,
+            @RequestParam(value = "message", required = false) String message) {
+        userService.validUserPhoneNumber(username, phoneNumber);
+        phoneService.sendCaptcha(phoneNumber, IpUtil.getIpAddr(request), cpuId, message);
         return GlobalResponse.success();
     }
 

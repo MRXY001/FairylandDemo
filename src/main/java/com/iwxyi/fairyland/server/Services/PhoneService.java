@@ -32,7 +32,7 @@ public class PhoneService {
      * @param number 手机号（不包含区号吧）
      * @param cpuId  调用起的唯一设备码（不一定有）
      */
-    public void sendCaptcha(String number, String ip, String cpuId) {
+    public void sendCaptcha(String number, String ip, String cpuId, String message) {
         // 判断一分钟内是否发送过了，避免轰炸（不管有没有成功验证，都限制只发一次）
         PhoneValidation history = phoneRepository.findFirstByNumberOrderByCreateTimeDesc(number);
         if (history != null && history.getCreateTime().getTime() + 60 * 1000 > (new Date()).getTime()) {
@@ -84,7 +84,7 @@ public class PhoneService {
 
         // 创建验证码
         Date time = new Date();
-        PhoneValidation validation = new PhoneValidation(number, captcha, time);
+        PhoneValidation validation = new PhoneValidation(number, captcha, time, message);
         if (ip != null) {
             validation.setIp(ip); // 记录ID
         }
@@ -136,6 +136,9 @@ public class PhoneService {
         throw new FormatedException("请输入正确的验证码", ErrorCode.Incorrect);
     }
 
+    /**
+     * 接入手机号发送API
+     */
     private void sendCaptcha(String number, String code) {
         if (ConstantKey.ALIYUN_ACCESS_KEY_ID.isEmpty()) {
             System.out.println("短信验证码 ALIYUN_ACCESS_KEY_ID 为空，假装发送了：" + code);

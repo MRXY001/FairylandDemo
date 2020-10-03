@@ -27,14 +27,16 @@ public class PhoneValidation {
     private String captcha;
     private String ip;
     private String cpuId;
+    private String message;
     private Date createTime;
     private int failCount;
     private boolean verified;
     
-    public PhoneValidation(String number, String captcha, Date time) {
+    public PhoneValidation(String number, String captcha, Date time, String message) {
         this.number = number;
         this.captcha = captcha;
         this.createTime = time;
+        this.message = message;
     }
     
     public void setVerified() {
