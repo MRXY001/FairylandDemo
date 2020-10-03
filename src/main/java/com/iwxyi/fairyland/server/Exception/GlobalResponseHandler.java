@@ -62,8 +62,9 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
      * 捕获以下异常：
      * throw new RuntimeException("xxx")
      * 默认 code = null
+     * !捕获之后，系统的各种详细报错也就没了
      */
-    @ResponseBody
+    /* @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @ExceptionHandler({ Throwable.class })
     public <T> GlobalResponse<T> handleThrowable(Throwable e) {
@@ -72,7 +73,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
         // log.error(Throwables.getStackTraceAsString(e));
         // return GlobalResponse.failed(Throwables.getStackTraceAsString(e), null);
         return GlobalResponse.fail(msg);
-    }
+    } */
     
 
     /**

@@ -72,17 +72,17 @@ public class SyncController {
         List<SyncBook> bookList = null;
         if (syncTime != null && syncTime > 0) {
             // 一次性下载
-            syncChapters = chapterService.getUserUpdatedChapters(userId, syncTime);
+            syncChapters = chapterService.getUserUpdatedChapters(userId, new Date(syncTime));
         } else {
             // 只给出更新的作品
             bookList = new ArrayList<SyncBook>();
             for (int i = 0; i < syncBooks.size(); i++) {
-                if (syncBooks.get(i).getModifyTime() != null && syncBooks.get(i).getModifyTime().getTime() > syncTime) {
+                if (syncBooks.get(i).getUpdateTime() != null && syncBooks.get(i).getUpdateTime().getTime() > syncTime) {
                     bookList.add(syncBooks.get(i));
                 }
             }
         }
-        return GlobalResponse.map("books", syncBooks, "chapters", syncChapters, "bookList", syncBooks);
+        return GlobalResponse.map("books", syncBooks, "chapters", syncChapters, "bookList", bookList);
     }
 
     /**

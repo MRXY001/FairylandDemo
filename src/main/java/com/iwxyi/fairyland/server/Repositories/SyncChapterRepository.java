@@ -21,7 +21,7 @@ public interface SyncChapterRepository extends CrudRepository<SyncChapter, Long>
     SyncChapter findFirstByUserIdAndBookIndexAndChapterId(Long userId, Long bookIndex, String chapterId);
 
     List<SyncChapter> findByUserIdAndDeletedAndBookDeletedAndModifyTimeGreaterThan(Long userId, boolean notDeleted,
-            boolean bookExist, long time);
+            boolean bookExist, Date time);
 
     List<SyncChapter> findByUserIdAndBookIndexAndDeletedAndBookDeletedAndModifyTimeGreaterThan(Long userId,
             Long bookIndex, boolean notDeleted, boolean bookExist, Date time);

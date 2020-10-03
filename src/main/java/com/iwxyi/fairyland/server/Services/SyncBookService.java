@@ -31,7 +31,8 @@ public class SyncBookService {
     }
 
     public List<SyncBook> getUserUpdatedBooks(Long userId, long time) {
-        return bookRepository.findByUserIdAndDeletedFalseAndUpdateTimeGreaterThan(userId, new Date(time));
+        // return bookRepository.findByUserIdAndDeletedFalse(userId);
+        return new ArrayList<SyncBook>();
     }
 
     public SyncBook getBook(Long userId, Long bookIndex) {
