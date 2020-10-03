@@ -16,9 +16,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @ControllerAdvice(annotations = { RestController.class, Controller.class })
 public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
     @Override

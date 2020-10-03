@@ -72,7 +72,7 @@ public class SyncController {
         List<SyncBook> bookList = null;
         if (syncTime != null && syncTime > 0) {
             // 一次性下载
-            syncChapters = chapterService.getUserUpdatedChapters(userId, new Date(syncTime));
+            syncChapters = chapterService.getUserUpdatedChapters(userId, syncTime);
         } else {
             // 只给出更新的作品
             bookList = new ArrayList<SyncBook>();

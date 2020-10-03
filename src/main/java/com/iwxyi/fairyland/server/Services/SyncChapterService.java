@@ -23,9 +23,9 @@ public class SyncChapterService {
         return chapterRepository.findByUserId(userId);
     }
 
-    public List<SyncChapter> getUserUpdatedChapters(Long userId, Date syncTime) {
+    public List<SyncChapter> getUserUpdatedChapters(Long userId, Long syncTime) {
         return chapterRepository.findByUserIdAndDeletedAndBookDeletedAndModifyTimeGreaterThan(userId, false, false,
-                syncTime);
+                new Date(syncTime));
     }
 
     public List<SyncChapter> getBookUpdatedChapters(Long userId, Long bookIndex, long timestamp) {
