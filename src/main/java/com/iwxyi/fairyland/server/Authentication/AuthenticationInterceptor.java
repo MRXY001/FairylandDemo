@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.iwxyi.fairyland.server.Config.ConstantKey;
+import com.iwxyi.fairyland.server.Config.ErrorCode;
+import com.iwxyi.fairyland.server.Exception.FormatedException;
 import com.iwxyi.fairyland.server.Tools.TokenUtil;
 
 import org.springframework.web.method.HandlerMethod;
@@ -35,7 +37,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         // 如果不是允许的方法，不会到达这边来，因此是必须需要token
         String token = request.getHeader(ConstantKey.TOKEN_HEADER);// 从 http 请求头中取出 token
         if (token == null) {
-            throw new RuntimeException("请先登录账户");
+            throw new FormatedException("请先登录账户", ErrorCode.Login);
         }
 
         // 获取 token 中的 name

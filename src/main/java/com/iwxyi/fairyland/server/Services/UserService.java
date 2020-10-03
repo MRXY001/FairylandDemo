@@ -179,6 +179,10 @@ public class UserService {
     public User getUserByUserId(Long userId) {
         return userRepository.findByUserId(userId);
     }
+    
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 
     public void modifyNickname(User user, String nickname) {
         Date prevTime = user.getNicknameModifyTime();
@@ -212,7 +216,7 @@ public class UserService {
         if (user == null) {
             throw new FormatedException("未找到该用户", ErrorCode.NotExist);
         }
-        if (user.getPhoneNumber().equals(phoneNumber)) {
+        if (!user.getPhoneNumber().equals(phoneNumber)) {
             throw new FormatedException("手机号错误", ErrorCode.Incorrect);
         }
     }

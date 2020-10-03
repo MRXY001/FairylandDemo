@@ -105,19 +105,6 @@ public class UserController {
     }
 
     /**
-     * 忘记密码，发送手机号验证
-     * 需要用户名与手机号匹配
-     */
-    @RequestMapping("/sendUserPhoneValidation")
-    public GlobalResponse<?> sendUserPhoneValidation(@RequestParam("username") String username, @RequestParam("phoneNumber") String phoneNumber,
-            @RequestParam(value = "cpuId", required = false) String cpuId,
-            @RequestParam(value = "message", required = false) String message) {
-        userService.validUserPhoneNumber(username, phoneNumber);
-        phoneService.sendCaptcha(phoneNumber, IpUtil.getIpAddr(request), cpuId, message);
-        return GlobalResponse.success();
-    }
-
-    /**
      * 发送邮箱验证
      */
     @RequestMapping("/sendMailValidation")
@@ -168,12 +155,29 @@ public class UserController {
     }
 
     /**
+     * 忘记密码，发送手机号验证
+     * 需要用户名与手机号匹配
+     */
+    @RequestMapping("/sendUserPhoneValidation")
+    public GlobalResponse<?> sendUserPhoneValidation(@RequestParam("username") String username,
+            @RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam(value = "cpuId", required = false) String cpuId,
+            @RequestParam(value = "message", required = false) String message) {
+        userService.validUserPhoneNumber(username, phoneNumber);
+        phoneService.sendCaptcha(phoneNumber, IpUtil.getIpAddr(request), cpuId, message);
+        return GlobalResponse.success();
+    }
+
+    /**
      * 忘记密码，需要发送手机验证码
      */
     @RequestMapping("/forgetPassword")
-    @LoginRequired
-    public GlobalResponse<?> forgetPassword(@LoginUser User user, @RequestParam("password") String password,
-            @RequestParam("captcha") String captcha) {
+    public GlobalResponse<?> forgetPassword(@RequestParam("username") String username,
+            @RequestParam("password") String password, @RequestParam("captcha") String captcha) {
+        User user = userService.getUserByUsername(username);
+        if (user == null) {
+            throw new FormatedException("未找到用户", ErrorCode.NotExist);
+        }
         phoneService.validateCaptcha(user.getPhoneNumber(), captcha);
         userService.setPassword(user, password);
         return GlobalResponse.success();
