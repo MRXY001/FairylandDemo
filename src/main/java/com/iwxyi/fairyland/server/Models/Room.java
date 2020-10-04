@@ -24,7 +24,8 @@ public class Room {
     private Long roomId;
     @NotNull
     private Long creatorId; // 创建者的userId，永远不变
-    private Long ownerId; // 当前房主的Id，可空
+    private Long ownerId; // 当前房主的Id（可空，表示不存在）
+    private String ownerName; // 当前房主的Name（可空）
     @NotBlank(message = "房间名称不能为空")
     @Length(min = 2, max = 16, message = "房间名称长度必须在{min}~{max}之间")
     private String roomName;

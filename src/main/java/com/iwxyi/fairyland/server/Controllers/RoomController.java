@@ -1,5 +1,7 @@
 package com.iwxyi.fairyland.server.Controllers;
 
+import java.util.List;
+
 import com.iwxyi.fairyland.server.Authentication.LoginRequired;
 import com.iwxyi.fairyland.server.Authentication.LoginUser;
 import com.iwxyi.fairyland.server.Exception.GlobalResponse;
@@ -49,8 +51,9 @@ public class RoomController {
      */
     @PostMapping(value = "/join")
     @LoginRequired
-    public GlobalResponse<?> joinRoom(@LoginUser User user, @RequestParam("roomId") Long roomId) {
-        Room room = roomService.joinRoom(user, roomId);
+    public GlobalResponse<?> joinRoom(@LoginUser User user, @RequestParam("roomId") Long roomId,
+            @RequestParam(value = "password", required = false) String password) {
+        Room room = roomService.joinRoom(user, roomId, password);
         return GlobalResponse.success(room);
     }
 
@@ -76,9 +79,16 @@ public class RoomController {
         if (pageNumber == null) {
             pageNumber = 1;
         }
-        
+
         // 排序方式：等级
         Page<Room> rooms = roomService.pagedRank(pageNumber, 20, Sort.by(Sort.Direction.DESC, "level"));
+        return GlobalResponse.success(rooms);
+    }
+
+    @PostMapping(value = "/myRooms")
+    @LoginRequired
+    public GlobalResponse<?> myRooms(@LoginUser Long userId) {
+        List<Room> rooms = roomService.getUserRooms(userId);
         return GlobalResponse.success(rooms);
     }
 }

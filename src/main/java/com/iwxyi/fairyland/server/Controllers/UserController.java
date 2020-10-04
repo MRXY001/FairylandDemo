@@ -202,7 +202,7 @@ public class UserController {
      * 增加用户的一些小积分项
      * 不会超额太多
      */
-    @RequestMapping("/increaseIntegral")
+    @RequestMapping("/uploadIntegral")
     @LoginRequired
     public GlobalResponse<?> uploadIntegral(@LoginUser User user, @RequestParam("words") int words,
             @RequestParam("times") int times, @RequestParam("useds") int useds, @RequestParam("bonus") int bonus,
@@ -216,13 +216,17 @@ public class UserController {
      */
     @RequestMapping("/rank")
     @ResponseBody
-    public GlobalResponse<?> rank(@RequestParam(value = "pageNumber", required = false) Integer pageNumber) {
+    public GlobalResponse<?> rank(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+            @RequestParam(value = "sort", required = false) String sort) {
         if (pageNumber == null) {
             pageNumber = 1;
         }
+        if (sort == null || sort.isEmpty()) {
+            sort = "level";
+        }
 
         // 排序方式，这里以等级进行排序
-        Page<User> users = userService.pagedRank(pageNumber - 1, 20, Sort.by(Sort.Direction.DESC, "level"));
+        Page<User> users = userService.pagedRank(pageNumber - 1, 20, Sort.by(Sort.Direction.DESC, sort));
         return GlobalResponse.success(users);
     }
 

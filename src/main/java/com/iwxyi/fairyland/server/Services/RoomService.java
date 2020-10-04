@@ -1,5 +1,6 @@
 package com.iwxyi.fairyland.server.Services;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,17 +48,23 @@ public class RoomService {
         canUserJoinRoom(user);
         // 创建房间
         Room room = new Room(user.getUserId(), roomName, password, introduction);
+        room.setOwnerName(user.getNickname());
+        room.setCreateTime(new Date());
         room = roomRepository.save(room);
         // 用户加入自己创建的房间
-        room = joinRoom(user, room);
+        room = joinRoom(user, room, password);
         return room;
     }
 
-    public Room joinRoom(User user, Long roomId) {
-        return joinRoom(user, roomRepository.findByRoomId(roomId));
+    public Room joinRoom(User user, Long roomId, String password) {
+        return joinRoom(user, roomRepository.findByRoomId(roomId), password);
     }
 
-    public Room joinRoom(User user, Room room) {
+    public Room joinRoom(User user, Room room, String password) {
+        if (room.isDeleted()) {
+            throw new FormatedException("房间已解散", ErrorCode.NotExist);
+        }
+        
         // 判断加入数量上限
         canUserJoinRoom(user);
 
@@ -65,6 +72,11 @@ public class RoomService {
         RoomMember roomMember = roomMemberRepository.findByRoomIdAndUserId(room.getRoomId(), user.getUserId());
         if (roomMember != null) {
             throw new FormatedException("您已经加入了", ErrorCode.Exist);
+        }
+        
+        // 判断密码是否正确
+        if (room.getPassword() != null && !room.getPassword().equals(password)) {
+            throw new FormatedException("房间密码错误", ErrorCode.Incorrect);
         }
 
         // 房间成员数量+1
@@ -133,6 +145,7 @@ public class RoomService {
         }
         // 转移房主
         room.setOwnerId(newOwner.getUserId());
+        room.setOwnerName(newOwner.getNickname());
         roomRepository.save(room);
         
         // 修改权限
@@ -156,6 +169,9 @@ public class RoomService {
         }
         if (room.getOwnerId() != userId) {
             throw new FormatedException("只有房主才能解散拼字房间", ErrorCode.Permission);
+        }
+        if (room.isDeleted()) {
+            throw new FormatedException("房间已解散", ErrorCode.NotExist);
         }
 
         // 移除房间用户
@@ -184,7 +200,19 @@ public class RoomService {
         room.setDeleted(true);
         roomRepository.save(room);
     }
+    
+    public List<Room> getUserRooms(Long userId) {
+        List<RoomMember> roomMembers = roomMemberRepository.findByUserId(userId);
+        List<Room> rooms = new ArrayList<>();
+        for (RoomMember roomMember : roomMembers) {
+            rooms.add(roomRepository.findByRoomId(roomMember.getRoomId()));
+        }
+        return rooms;
+    }
 
+    /**
+     * 排行榜
+     */
     public Page<Room> pagedRank(int page, int size, Sort sort) {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Room> rooms = roomRepository.findByDeletedFalse(pageable);

@@ -238,7 +238,7 @@ public class UserService {
             throw new FormatedException("古怪的时间", ErrorCode.Data);
         } else if (times == 0 && words >= 200) {
             throw new FormatedException("奇怪的字数", ErrorCode.Data);
-        } else if ((times <= 2) && words / times > 400) { // 可能是相邻两分钟的字数
+        } else if ((times > 0 && times <= 2) && words / times > 400) { // 可能是相邻两分钟的字数
             throw new FormatedException("神奇的速度", ErrorCode.Data);
         } else if (times > 0 && words / times > 200) {
             throw new FormatedException("怪异的速度", ErrorCode.Data);
