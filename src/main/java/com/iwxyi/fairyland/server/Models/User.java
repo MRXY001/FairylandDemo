@@ -33,7 +33,7 @@ public class User {
     @Pattern(regexp = "^[\\u4e00-\\u9fa5\\w\\d_]{2,16}$", message = "用户名只允许2~16位的汉字/大小写字母/数字/下划线")
     private String username;
     @NotBlank(message = "密码不能为空")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // 从JSON中读取，但不保存到JSON
     private String passwordHash;
     @NotBlank(message = "昵称不能为空")
     @Pattern(regexp = "^[\\u4e00-\\u9fa5\\w\\d_]{2,16}$", message = "昵称只允许2~16位的汉字/大小写字母/数字/下划线")
@@ -77,6 +77,7 @@ public class User {
     private int roomJoinedCount; // 当前加入了多少个房间
 
     private int level;
+    private int rank;
     private int integral;
     @Min(0)
     private int allWords;
@@ -105,9 +106,8 @@ public class User {
     private int loginFailedCount; // 出错次数
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Date loginForbidTime;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date syncTime;
+    private Date activeTime; // 活动时间
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date createTime;
@@ -115,6 +115,11 @@ public class User {
     private Date blockTime;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Date nicknameModifyTime;
+    
+    private boolean systemWindows;
+    private boolean systemAndroid;
+    private boolean systemMac;
+    private boolean systemIos;
 
     public User(String username, String passwordHash, String phoneNumber, Date createTime) {
         this.username = username;

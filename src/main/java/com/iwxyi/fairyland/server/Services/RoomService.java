@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,7 +48,9 @@ public class RoomService {
         // 判断用户能否再加入房间
         canUserJoinRoom(user);
         // 创建房间
-        Room room = new Room(user.getUserId(), roomName, password, introduction);
+        String passwordHash = (password != null && !password.isEmpty()) ? (new BCryptPasswordEncoder()).encode(password)
+                : null;
+        Room room = new Room(user.getUserId(), roomName, passwordHash, introduction);
         room.setOwnerName(user.getNickname());
         room.setCreateTime(new Date());
         room = roomRepository.save(room);
@@ -64,7 +67,7 @@ public class RoomService {
         if (room.isDeleted()) {
             throw new FormatedException("房间已解散", ErrorCode.NotExist);
         }
-        
+
         // 判断加入数量上限
         canUserJoinRoom(user);
 
@@ -73,10 +76,12 @@ public class RoomService {
         if (roomMember != null) {
             throw new FormatedException("您已经加入了", ErrorCode.Exist);
         }
-        
+
         // 判断密码是否正确
-        if (room.getPassword() != null && !room.getPassword().equals(password)) {
-            throw new FormatedException("房间密码错误", ErrorCode.Incorrect);
+        if (room.getPasswordHash() != null && !room.getPasswordHash().isEmpty()) {
+            if (!(new BCryptPasswordEncoder()).matches(password, room.getPasswordHash())) {
+                throw new FormatedException("房间密码错误", ErrorCode.Incorrect);
+            }
         }
 
         // 房间成员数量+1
@@ -106,7 +111,7 @@ public class RoomService {
         if (room == null) {
             throw new FormatedException("未找到房间", ErrorCode.NotExist);
         }
-        
+
         // 判断是否确实是加入了
         RoomMember roomMember = roomMemberRepository.findByRoomIdAndUserId(room.getRoomId(), user.getUserId());
         if (roomMember == null) {
@@ -133,26 +138,26 @@ public class RoomService {
             roomHistory.leave(new Date(), integral);
         }
         roomHistoryRepository.save(roomHistory);
-        
+
         // 用户加入的房间数-1
         user.setRoomJoinedCount(user.getRoomJoinedCount() - 1);
         userRepository.save(user);
     }
-    
+
     public void transferRoom(User oldOwner, Room room, User newOwner) {
         if (room.getOwnerId() != oldOwner.getUserId()) {
-            throw new  FormatedException("请先努力成为房主", ErrorCode.Permission);
+            throw new FormatedException("请先努力成为房主", ErrorCode.Permission);
         }
         // 转移房主
         room.setOwnerId(newOwner.getUserId());
         room.setOwnerName(newOwner.getNickname());
         roomRepository.save(room);
-        
+
         // 修改权限
         RoomMember oldMember = roomMemberRepository.findByRoomIdAndUserId(room.getRoomId(), oldOwner.getUserId());
         oldMember.setStatus(0);
         roomMemberRepository.save(oldMember);
-        
+
         RoomMember newMember = roomMemberRepository.findByRoomIdAndUserId(room.getRoomId(), newOwner.getUserId());
         newMember.setStatus(2);
         roomMemberRepository.save(newMember);
@@ -200,7 +205,7 @@ public class RoomService {
         room.setDeleted(true);
         roomRepository.save(room);
     }
-    
+
     public List<Room> getUserRooms(Long userId) {
         List<RoomMember> roomMembers = roomMemberRepository.findByUserId(userId);
         List<Room> rooms = new ArrayList<>();
@@ -227,5 +232,13 @@ public class RoomService {
             throw new FormatedException("您已加入" + count + "个房间，达到上限，请先退出已有房间", ErrorCode.Insufficient);
         }
         return true;
+    }
+
+    /**
+     * 修改用户名字，固定显示的用户名字也要修改
+     * - 当前房主名字
+     */
+    public void modifyUserNickname(Long userId, String nickname) {
+        roomRepository.modifyOwnerNickname(userId, nickname);
     }
 }

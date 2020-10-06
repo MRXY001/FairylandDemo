@@ -147,6 +147,7 @@ public class UserController {
     @LoginRequired
     public GlobalResponse<?> modifyNickname(@LoginUser User user, String nickname) {
         userService.modifyNickname(user, nickname);
+        roomService.modifyUserNickname(user.getUserId(), nickname);
         return GlobalResponse.success();
     }
 
