@@ -1,6 +1,7 @@
 package com.iwxyi.fairyland.server.Controllers;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
@@ -11,10 +12,12 @@ import com.iwxyi.fairyland.server.Config.ErrorCode;
 import com.iwxyi.fairyland.server.Exception.FormatedException;
 import com.iwxyi.fairyland.server.Exception.GlobalResponse;
 import com.iwxyi.fairyland.server.Models.Coupon;
+import com.iwxyi.fairyland.server.Models.Room;
 import com.iwxyi.fairyland.server.Models.User;
 import com.iwxyi.fairyland.server.Services.LoginService;
 import com.iwxyi.fairyland.server.Services.MailService;
 import com.iwxyi.fairyland.server.Services.PhoneService;
+import com.iwxyi.fairyland.server.Services.RoomService;
 import com.iwxyi.fairyland.server.Services.UserService;
 import com.iwxyi.fairyland.server.Services.VipPaymentService;
 import com.iwxyi.fairyland.server.Tools.IpUtil;
@@ -40,6 +43,8 @@ public class UserController {
     UserService userService;
     @Autowired
     PhoneService phoneService;
+    @Autowired
+    RoomService roomService;
     @Autowired
     private MailService mailService;
     @Autowired
@@ -71,8 +76,10 @@ public class UserController {
         loginService.saveLogin(user.getUserId(), username, cpuId, "初次注册");
         // 注册成功，创建token
         String token = TokenUtil.createTokenByUser(user);
+        // 加入的拼字房间
+        List<Room> rooms = roomService.getUserRooms(user.getUserId());
         // 返回新账号后的一些信息
-        return GlobalResponse.map("token", token, "user", user);
+        return GlobalResponse.map("token", token, "user", user, "joinedRooms", rooms);
     }
 
     /**
