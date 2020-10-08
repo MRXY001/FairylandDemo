@@ -12,7 +12,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 public interface RoomMemberRepository extends CrudRepository<RoomMember, Long> {
-    List<RoomMember> findByRoomId(Long roomId);
+    List<RoomMember> findByRoomIdOrderByContributionDesc(Long roomId);
 
     List<RoomMember> findByUserId(Long userId);
 

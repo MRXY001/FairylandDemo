@@ -6,6 +6,7 @@ import com.iwxyi.fairyland.server.Authentication.LoginRequired;
 import com.iwxyi.fairyland.server.Authentication.LoginUser;
 import com.iwxyi.fairyland.server.Exception.GlobalResponse;
 import com.iwxyi.fairyland.server.Models.Room;
+import com.iwxyi.fairyland.server.Models.RoomMember;
 import com.iwxyi.fairyland.server.Models.User;
 import com.iwxyi.fairyland.server.Services.RoomService;
 import com.iwxyi.fairyland.server.Services.UserService;
@@ -90,5 +91,11 @@ public class RoomController {
     public GlobalResponse<?> myRooms(@LoginUser Long userId) {
         List<Room> rooms = roomService.getUserRooms(userId);
         return GlobalResponse.success(rooms);
+    }
+    
+    @PostMapping(value = "/roomMembers")
+    public GlobalResponse<?> roomMembers(Long roomId) {
+        List<RoomMember> members = roomService.getRoomMembers(roomId);
+        return GlobalResponse.success(members);
     }
 }

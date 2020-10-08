@@ -180,7 +180,7 @@ public class RoomService {
         }
 
         // 移除房间用户
-        List<RoomMember> members = roomMemberRepository.findByRoomId(roomId);
+        List<RoomMember> members = roomMemberRepository.findByRoomIdOrderByContributionDesc(roomId);
         for (int i = 0; i < members.size(); i++) {
             RoomMember member = members.get(i);
 
@@ -240,5 +240,12 @@ public class RoomService {
      */
     public void modifyUserNickname(Long userId, String nickname) {
         roomRepository.modifyOwnerNickname(userId, nickname);
+    }
+    
+    /**
+     * 获取房间中的所有成员
+     */
+    public List<RoomMember> getRoomMembers(Long roomId) {
+        return roomMemberRepository.findByRoomIdOrderByContributionDesc(roomId);
     }
 }
