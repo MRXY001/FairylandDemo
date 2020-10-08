@@ -21,7 +21,7 @@ public class RoomHistory {
     private Long userId;
     private Date joinTime;
     private Date leaveTime;
-    private int leaveIntegral; // 离开时的积分
+    private int leaveContribution; // 离开时的积分
 
     public RoomHistory(Long roomId, Long userId, Date joinTime) {
         this.roomId = roomId;
@@ -29,15 +29,15 @@ public class RoomHistory {
         this.joinTime = joinTime;
     }
 
-    public RoomHistory(Long roomId, Long userId, Date leaveTime, int leaveIntegral) {
+    public RoomHistory(Long roomId, Long userId, Date leaveTime, int leaveContribution) {
         this.roomId = roomId;
         this.userId = userId;
         this.leaveTime = leaveTime;
-        this.leaveIntegral = leaveIntegral;
+        this.leaveContribution = leaveContribution;
     }
 
-    public void leave(Date leaveTime, int leaveIntegral) {
+    public void leave(Date leaveTime, int leaveContribution) {
         this.leaveTime = leaveTime;
-        this.leaveIntegral = leaveIntegral;
+        this.leaveContribution = leaveContribution;
     }
 }

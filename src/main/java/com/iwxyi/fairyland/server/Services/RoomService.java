@@ -127,7 +127,7 @@ public class RoomService {
         roomRepository.save(room);
 
         // 用户离开房间
-        int integral = roomMember.getIntegral(); // 这一时刻的积分
+        int integral = roomMember.getContribution(); // 这一时刻的积分
         roomMemberRepository.delete(roomMember);
 
         // 保存离开房间的历史
@@ -187,7 +187,7 @@ public class RoomService {
             // 保存退出时的记录
             RoomHistory history = roomHistoryRepository.findFirstByRoomIdAndUserId(roomId, member.getUserId());
             if (history != null) {
-                history.setLeaveIntegral(member.getIntegral());
+                history.setLeaveContribution(member.getContribution());
                 roomHistoryRepository.save(history);
             }
 

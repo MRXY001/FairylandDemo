@@ -20,7 +20,7 @@ public interface RoomMemberRepository extends CrudRepository<RoomMember, Long> {
     
     @Modifying
     @Transactional
-    @Query("update RoomMember rm set rm.integral = rm.integral + :add where rm.userId = :userId")
-    void increaseRoomMemberIntegral(@Param("userId") Long userId, @Param("add") int add);
+    @Query("update RoomMember rm set rm.contribution = rm.contribution + :add where rm.userId = :userId")
+    void increaseRoomMemberContribution(@Param("userId") Long userId, @Param("add") int add);
 
 }

@@ -22,7 +22,7 @@ public class RoomMember {
     private Long roomId;
     @NotNull
     private Long userId;
-    private int integral; // 给房间的贡献（不扣除）
+    private int contribution; // 给房间的贡献（不扣除）
     @NotNull
     private Date joinTime;
     private int status; // 地位：0普通，1管理员，2房主
