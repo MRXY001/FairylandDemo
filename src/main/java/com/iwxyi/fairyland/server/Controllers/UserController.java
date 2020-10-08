@@ -30,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -235,6 +236,20 @@ public class UserController {
 
         // 排序方式，这里以等级进行排序
         Page<User> users = userService.pagedRank(pageNumber - 1, 20, Sort.by(Sort.Direction.DESC, sort));
+        return GlobalResponse.success(users);
+    }
+    
+    @RequestMapping("/getUserWithConfitions")
+    @ResponseBody
+    public GlobalResponse<?> getUserWithConfitions(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+            @RequestBody User user) {
+        if (pageNumber == null) {
+            pageNumber = 1;
+        }
+        final int pageSize = 20;
+
+        // 排序方式，这里以等级进行排序
+        List<User> users = userService.getAllUsersWithConditions(pageNumber, pageSize, user);
         return GlobalResponse.success(users);
     }
 

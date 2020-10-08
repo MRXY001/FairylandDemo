@@ -1,6 +1,10 @@
 package com.iwxyi.fairyland.server.Services;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import javax.persistence.criteria.Predicate;
 
 import com.iwxyi.fairyland.server.Config.ConstantValue;
 import com.iwxyi.fairyland.server.Config.ErrorCode;
@@ -179,7 +183,7 @@ public class UserService {
     public User getUserByUserId(Long userId) {
         return userRepository.findByUserId(userId);
     }
-    
+
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
@@ -210,7 +214,7 @@ public class UserService {
         user.setPasswordHash(passwordHash);
         userRepository.save(user);
     }
-    
+
     public void validUserPhoneNumber(String username, String phoneNumber) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
@@ -257,7 +261,7 @@ public class UserService {
         // 累计字数到所有拼字房间
         if (user.getRoomJoinedCount() > 0) {
             int contribution = words + times; // 只计算字数，以及少量时间
-            roomMemberRepository.increaseRoomMemberIntegral(user.getUserId(), contribution);
+            roomMemberRepository.increaseRoomMemberContribution(user.getUserId(), contribution);
             /* List<RoomMember> roomMembers = roomMemberRepository.findByUserId(user.getUserId());
             for (RoomMember roomMember : roomMembers) {
                 roomMember.setIntegral(roomMember.getIntegral() + contribution);
@@ -271,6 +275,29 @@ public class UserService {
     public Page<User> pagedRank(int page, int size, Sort sort) {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<User> users = userRepository.findAll(pageable);
+        return users;
+    }
+
+    /**
+     * 查询User，单表，多条件
+     */
+    public List<User> getAllUsersWithConditions(int page, int size, User user) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<User> users = userRepository.findAll((root, criteriaQuery, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (user.getUserId() != null) {
+                predicates.add(cb.equal(root.get("userId").as(Long.class), user.getUserId()));
+            }
+            if (user.getNickname() != null && !user.getNickname().isEmpty()) {
+                predicates.add(cb.like(root.get("nickname").as(String.class), "%" + user.getNickname() + "%"));
+            }
+            if (user.getUsername() != null && !user.getUsername().isEmpty()) {
+                predicates.add(cb.like(root.get("username").as(String.class), "%" + user.getUsername() + "%"));
+            }
+            Predicate[] pre = new Predicate[predicates.size()];
+            criteriaQuery.where(predicates.toArray(pre));
+            return cb.and(predicates.toArray(pre));
+        }, pageable);
         return users;
     }
 }

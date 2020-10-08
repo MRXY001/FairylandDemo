@@ -1,9 +1,12 @@
 package com.iwxyi.fairyland.server.Repositories;
 
+import java.util.List;
+
 import com.iwxyi.fairyland.server.Models.User;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 
 public interface UserRepository extends CrudRepository<User, Long> {
@@ -20,4 +23,5 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     Page<User> findAll(Pageable pageable);
 
+    List<User> findAll(Specification<User> specification, Pageable pageable);
 }
