@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import lombok.Data;
@@ -26,6 +27,7 @@ public class RoomMember {
     @NotNull
     private Date joinTime;
     private int status; // 地位：0普通，1管理员，2房主
+    
     public RoomMember(Long roomId, Long userId, Date joinTime) {
         this.roomId = roomId;
         this.userId = userId;

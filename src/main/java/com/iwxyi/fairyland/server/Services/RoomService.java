@@ -11,6 +11,7 @@ import com.iwxyi.fairyland.server.Exception.FormatedException;
 import com.iwxyi.fairyland.server.Models.Room;
 import com.iwxyi.fairyland.server.Models.RoomHistory;
 import com.iwxyi.fairyland.server.Models.RoomMember;
+import com.iwxyi.fairyland.server.Models.RoomMemberInfo;
 import com.iwxyi.fairyland.server.Models.User;
 import com.iwxyi.fairyland.server.Repositories.RoomHistoryRepository;
 import com.iwxyi.fairyland.server.Repositories.RoomMemberRepository;
@@ -207,7 +208,7 @@ public class RoomService {
     }
 
     public List<Room> getUserRooms(Long userId) {
-        List<RoomMember> roomMembers = roomMemberRepository.findByUserId(userId);
+        List<RoomMember> roomMembers = roomMemberRepository.findByUserIdOrderByContribution(userId);
         List<Room> rooms = new ArrayList<>();
         for (RoomMember roomMember : roomMembers) {
             rooms.add(roomRepository.findByRoomId(roomMember.getRoomId()));
@@ -227,7 +228,7 @@ public class RoomService {
     private boolean canUserJoinRoom(User user) {
         int maxCount = user.getRoomMaxCount();
         // 其实还有个 user.getRoomJoinedCount()，但这只是标记，不用来做判断依据
-        int count = (roomMemberRepository.findByUserId(user.getUserId())).size();
+        int count = (roomMemberRepository.findByUserIdOrderByContribution(user.getUserId())).size();
         if (count >= maxCount) {
             throw new FormatedException("您已加入" + count + "个房间，达到上限，请先退出已有房间", ErrorCode.Insufficient);
         }
@@ -247,5 +248,9 @@ public class RoomService {
      */
     public List<RoomMember> getRoomMembers(Long roomId) {
         return roomMemberRepository.findByRoomIdOrderByContributionDesc(roomId);
+    }
+    
+    public List<RoomMemberInfo> getRoomMemberInfos(Long roomId) {
+        return roomMemberRepository.findRoomMemberInfo(roomId);
     }
 }
