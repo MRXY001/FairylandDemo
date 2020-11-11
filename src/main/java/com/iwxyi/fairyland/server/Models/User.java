@@ -51,10 +51,10 @@ public class User {
     @Max(2)
     private int sex; // 0女，1男
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Pattern(regexp = "^([\\u4e00-\\u9fa5]{1,20}|[a-zA-Z\\.\\s]{1,20})$", message = "姓名格式错误")
+    @Pattern(regexp = "^([\\u4e00-\\u9fa5]{1,20}|[a-zA-Z\\.\\s]{1,20})?$", message = "姓名格式错误")
     private String realname; // 真实姓名
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Pattern(regexp = "(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)", message = "身份证格式错误")
+    @Pattern(regexp = "(^$)|(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)", message = "身份证格式错误")
     private String identityCard; // 实名身份证
     @Min(0)
     @Max(3)
@@ -62,16 +62,16 @@ public class User {
     @Min(0)
     @Max(3)
     private int blocking; // 封禁：1禁言，2冻结，3封号
-    @Pattern(regexp = "^\\d{5,10}$", message = "QQ号格式错误")
+    @Pattern(regexp = "^(\\d{5,10})?$", message = "QQ号格式错误")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String qqNumber;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String wxUnionid;
-    @Pattern(regexp = "^[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*@[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*\\.[a-z]{2,}$", message = "邮箱格式错误")
+    @Pattern(regexp = "^([a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*@[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*\\.[a-z]{2,})?$", message = "邮箱格式错误")
     private String emailAddress;
     @Length(min = 0, max = 20, message = "签名长度不能超过20字")
     private String motto;
-    @Pattern(regexp = "(http|ftp|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?", message = "个人主页配置出错")
+    @Pattern(regexp = "^((http|ftp|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?)?$", message = "个人主页配置出错")
     private String homePage;
     private int roomMaxCount = 3; // 默认可以加入多少个房间
     private int roomJoinedCount; // 当前加入了多少个房间

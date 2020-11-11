@@ -239,15 +239,15 @@ public class UserService {
     public User increaseIntegral(User user, int words, int times, int useds, int bonus, Integer speed) {
         // 检测速度，防作弊系统
         if (times < 0 || times > 10) { // 超过10分钟才上传，这不奇怪？
-            throw new FormatedException("古怪的时间", ErrorCode.Data);
+            throw new FormatedException("古怪的时间" + times, ErrorCode.Data);
         } else if (times == 0 && words >= 200) {
-            throw new FormatedException("奇怪的字数", ErrorCode.Data);
+            throw new FormatedException("奇怪的字数" + words, ErrorCode.Data);
         } else if ((times > 0 && times <= 2) && words / times > 400) { // 可能是相邻两分钟的字数
             throw new FormatedException("神奇的速度", ErrorCode.Data);
         } else if (times > 0 && words / times > 200) {
             throw new FormatedException("怪异的速度", ErrorCode.Data);
         }
-
+        
         // 添加到用户信息中
         user.setAllWords(user.getAllWords() + words);
         user.setAllTimes(user.getAllTimes() + times);
