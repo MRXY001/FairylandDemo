@@ -82,7 +82,8 @@ public class RoomController {
         }
 
         // 排序方式：等级
-        Page<Room> rooms = roomService.pagedRank(pageNumber, 20, Sort.by(Sort.Direction.DESC, "level"));
+        // !这个页面是从0开始的，不是1
+        Page<Room> rooms = roomService.pagedRank(pageNumber - 1, 20, Sort.by(Sort.Direction.DESC, "level"));
         return GlobalResponse.success(rooms);
     }
 
@@ -92,7 +93,7 @@ public class RoomController {
         List<Room> rooms = roomService.getUserRooms(userId);
         return GlobalResponse.success(rooms);
     }
-    
+
     @PostMapping(value = "/roomMembers")
     public GlobalResponse<?> roomMembers(Long roomId) {
         List<RoomMemberInfo> members = roomService.getRoomMemberInfos(roomId);

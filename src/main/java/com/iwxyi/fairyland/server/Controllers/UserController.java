@@ -97,8 +97,10 @@ public class UserController {
         loginService.saveLogin(user.getUserId(), username, cpuId, "登录");
         // 登录成功，创建token （如果之前就带有token, 会把原来的token覆盖掉）
         String token = TokenUtil.createTokenByUser(user);
+        // 加入的拼字房间
+        List<Room> rooms = roomService.getUserRooms(user.getUserId());
         // 返回登录后的一些信息
-        return GlobalResponse.map("token", token, "user", user);
+        return GlobalResponse.map("token", token, "user", user, "rooms", rooms);
     }
 
     /**
@@ -232,17 +234,23 @@ public class UserController {
         }
         if (sort == null || sort.isEmpty()) {
             sort = "level";
+        } else if (sort.equals("today")) {
+            sort = "wordsToday";
+        } else if (sort.equals("yesterday")) {
+            sort = "wordsYesterday";
+        } else if (sort.equals("words")) {
+            sort = "allWords";
         }
 
         // 排序方式，这里以等级进行排序
         Page<User> users = userService.pagedRank(pageNumber - 1, 20, Sort.by(Sort.Direction.DESC, sort));
         return GlobalResponse.success(users);
     }
-    
+
     @RequestMapping("/getUserWithConfitions")
     @ResponseBody
-    public GlobalResponse<?> getUserWithConfitions(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
-            @RequestBody User user) {
+    public GlobalResponse<?> getUserWithConfitions(
+            @RequestParam(value = "pageNumber", required = false) Integer pageNumber, @RequestBody User user) {
         if (pageNumber == null) {
             pageNumber = 1;
         }

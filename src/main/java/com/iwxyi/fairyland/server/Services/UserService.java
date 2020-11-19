@@ -247,7 +247,7 @@ public class UserService {
         } else if (times > 0 && words / times > 200) {
             throw new FormatedException("怪异的速度", ErrorCode.Data);
         }
-        
+
         // 添加到用户信息中
         user.setAllWords(user.getAllWords() + words);
         user.setAllTimes(user.getAllTimes() + times);
@@ -270,6 +270,24 @@ public class UserService {
         }
 
         return user;
+    }
+
+    /**
+     * 更新每天的字数
+     * wordsYesterday = allWords - allWordsYesterday
+     * allWordsYesterday = allWords
+     * wordsToday = 0
+     */
+    public void updateDailyWords() {
+
+    }
+
+    /**
+     * 更新每个小时的字数
+     * wordsToday = allWords - allWordsYesterday
+     */
+    public void updateHourlyWords() {
+
     }
 
     public Page<User> pagedRank(int page, int size, Sort sort) {

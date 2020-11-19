@@ -88,6 +88,8 @@ public class User {
     @Min(0)
     private int allBonus;
     @Min(0)
+    private int wordsToday;
+    @Min(0)
     private int allWordsYesterday;
     @Min(0)
     private int wordsYesterday;
