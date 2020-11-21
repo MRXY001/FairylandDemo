@@ -10,7 +10,13 @@ import javax.persistence.criteria.Predicate;
 import com.iwxyi.fairyland.server.Config.ConstantValue;
 import com.iwxyi.fairyland.server.Config.ErrorCode;
 import com.iwxyi.fairyland.server.Exception.FormatedException;
+import com.iwxyi.fairyland.server.Models.AwardMedal;
+import com.iwxyi.fairyland.server.Models.DailyPersist;
+import com.iwxyi.fairyland.server.Models.Medal;
 import com.iwxyi.fairyland.server.Models.User;
+import com.iwxyi.fairyland.server.Repositories.AwardMedalRepository;
+import com.iwxyi.fairyland.server.Repositories.DailyPersistRepository;
+import com.iwxyi.fairyland.server.Repositories.MedalRepository;
 import com.iwxyi.fairyland.server.Repositories.RoomMemberRepository;
 import com.iwxyi.fairyland.server.Repositories.UserRepository;
 
@@ -31,6 +37,12 @@ public class UserService {
     UserRepository userRepository;
     @Autowired
     RoomMemberRepository roomMemberRepository;
+    @Autowired
+    DailyPersistRepository persistRepository;
+    @Autowired
+    MedalRepository medalRepository;
+    @Autowired
+    AwardMedalRepository awardRepository;
 
     Logger logger = LoggerFactory.getLogger(UserService.class);
 
@@ -282,7 +294,7 @@ public class UserService {
      * wordsToday = 0
      */
     public void updateDailyWords() {
-        // 获取昨天3点的日期
+        // #获取上次更新（昨天3点）的日期
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -291,10 +303,161 @@ public class UserService {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         date = calendar.getTime();
-        // 上次更新（昨天3点）之后活动过的账号
+
+        // #更新上次之后活动过的账号
         List<User> users = userRepository.findByActiveTimeGreaterThan(date);
-        System.out.println("--------------user.size" + users.size());
-        
+        for (User user : users) {
+            System.out.println("更新用户：" + user.getNickname());
+            // 更新每日字数等级
+            int exp = user.getAllWords() + user.getAllTimes() + user.getAllUseds() / 10 + user.getAllBonus();
+            int level = Double.valueOf(Math.sqrt(exp / 100 + 1)).intValue();
+            user.setIntegral(exp);
+            user.setLevel(level);
+            int wordsYesterday = user.getAllWords() - user.getAllWordsYesterday();
+            user.setWordsYesterday(wordsYesterday);
+            user.setAllWordsYesterday(user.getAllWords());
+
+            // 更新连续码字持续时间
+            DailyPersist persist = persistRepository.findByUserId(user.getUserId());
+            if (persist == null) {
+                persist = new DailyPersist(user.getUserId());
+            }
+            if (wordsYesterday > 0) {
+                persist.setDwc0(persist.getDwc0() + 1);
+                if (persist.getDwc0() == 365) {
+                    Medal medal = medalRepository.findByCode("dwc0");
+                    if (medal == null) {
+                        throw new FormatedException("请创建dwc0的勋章");
+                    }
+                    AwardMedal award = awardRepository.findByUserIdAndMedalId(user.getUserId(), medal.getMedalId());
+                    if (award == null) {
+                        award = new AwardMedal(user.getUserId(), medal.getMedalId(), "连续码字365天", new Date());
+                        awardRepository.save(award);
+                    }
+                }
+            } else {
+                persist.setDwc0(0);
+            }
+            if (wordsYesterday > 1000) {
+                persist.setDwc1(persist.getDwc1() + 1);
+                if (persist.getDwc1() == 100) {
+                    Medal medal = medalRepository.findByCode("dwc1");
+                    if (medal == null) {
+                        throw new FormatedException("请创建dwc1的勋章");
+                    }
+                    AwardMedal award = awardRepository.findByUserIdAndMedalId(user.getUserId(), medal.getMedalId());
+                    if (award == null) {
+                        award = new AwardMedal(user.getUserId(), medal.getMedalId(), "连续100天码1000字以上", new Date());
+                        awardRepository.save(award);
+                    }
+                }
+            } else {
+                persist.setDwc1(0);
+            }
+            if (wordsYesterday > 3000) {
+                persist.setDwc2(persist.getDwc2() + 1);
+                if (persist.getDwc2() == 30) {
+                    Medal medal = medalRepository.findByCode("dwc2");
+                    if (medal == null) {
+                        throw new FormatedException("请创建dwc2的勋章");
+                    }
+                    AwardMedal award = awardRepository.findByUserIdAndMedalId(user.getUserId(), medal.getMedalId());
+                    if (award == null) {
+                        award = new AwardMedal(user.getUserId(), medal.getMedalId(), "连续30天码3000字以上", new Date());
+                        awardRepository.save(award);
+                    }
+                }
+            } else {
+                persist.setDwc2(0);
+            }
+            if (wordsYesterday > 5000) {
+                persist.setDwc3(persist.getDwc3() + 1);
+                if (persist.getDwc3() == 15) {
+                    Medal medal = medalRepository.findByCode("dwc3");
+                    if (medal == null) {
+                        throw new FormatedException("请创建dwc3的勋章");
+                    }
+                    AwardMedal award = awardRepository.findByUserIdAndMedalId(user.getUserId(), medal.getMedalId());
+                    if (award == null) {
+                        award = new AwardMedal(user.getUserId(), medal.getMedalId(), "连续15天码5000字以上", new Date());
+                        awardRepository.save(award);
+                    }
+                }
+            } else {
+                persist.setDwc3(0);
+            }
+            if (wordsYesterday > 8000) {
+                persist.setDwc4(persist.getDwc4() + 1);
+                if (persist.getDwc4() == 7) {
+                    Medal medal = medalRepository.findByCode("dwc4");
+                    if (medal == null) {
+                        throw new FormatedException("请创建dwc4的勋章");
+                    }
+                    AwardMedal award = awardRepository.findByUserIdAndMedalId(user.getUserId(), medal.getMedalId());
+                    if (award == null) {
+                        award = new AwardMedal(user.getUserId(), medal.getMedalId(), "连续7天码8000字以上", new Date());
+                        awardRepository.save(award);
+                    }
+                }
+            } else {
+                persist.setDwc4(0);
+            }
+            if (wordsYesterday > 10000) {
+                persist.setDwc5(persist.getDwc5() + 1);
+                if (persist.getDwc5() == 5) {
+                    Medal medal = medalRepository.findByCode("dwc5");
+                    if (medal == null) {
+                        throw new FormatedException("请创建dwc5的勋章");
+                    }
+                    AwardMedal award = awardRepository.findByUserIdAndMedalId(user.getUserId(), medal.getMedalId());
+                    if (award == null) {
+                        award = new AwardMedal(user.getUserId(), medal.getMedalId(), "连续5天码10000字以上", new Date());
+                        awardRepository.save(award);
+                    }
+                }
+            } else {
+                persist.setDwc5(0);
+            }
+            if (wordsYesterday > 15000) {
+                persist.setDwc6(persist.getDwc6() + 1);
+                if (persist.getDwc6() == 3) {
+                    Medal medal = medalRepository.findByCode("dwc6");
+                    if (medal == null) {
+                        throw new FormatedException("请创建dwc6的勋章");
+                    }
+                    AwardMedal award = awardRepository.findByUserIdAndMedalId(user.getUserId(), medal.getMedalId());
+                    if (award == null) {
+                        award = new AwardMedal(user.getUserId(), medal.getMedalId(), "连续3天码15000字以上", new Date());
+                        awardRepository.save(award);
+                    }
+                }
+            } else {
+                persist.setDwc6(0);
+            }
+            if (wordsYesterday > 30000) {
+                persist.setDwc7(persist.getDwc7() + 1);
+                if (persist.getDwc7() == 1) {
+                    Medal medal = medalRepository.findByCode("dwc7");
+                    if (medal == null) {
+                        throw new FormatedException("请创建dwc7的勋章");
+                    }
+                    AwardMedal award = awardRepository.findByUserIdAndMedalId(user.getUserId(), medal.getMedalId());
+                    if (award == null) {
+                        award = new AwardMedal(user.getUserId(), medal.getMedalId(), "一天码30000字以上", new Date());
+                        awardRepository.save(award);
+                    }
+                }
+            } else {
+                persist.setDwc7(0);
+            }
+
+            persistRepository.save(persist);
+        }
+
+        // #修改房间等级
+
+        // #修改可创建房间数量
+
     }
 
     /**
