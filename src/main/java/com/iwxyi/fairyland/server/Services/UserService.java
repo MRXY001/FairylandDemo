@@ -1,6 +1,7 @@
 package com.iwxyi.fairyland.server.Services;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -168,6 +169,7 @@ public class UserService {
         if (time > 0) {
             user.setLoginForbidTime(new Date(time));
         }
+        user.setActiveTime(new Date());
         userRepository.save(user);
         throw new FormatedException(msg, ErrorCode.Incorrect);
     }
@@ -256,6 +258,7 @@ public class UserService {
         if (speed != null && speed > 0) {
             user.setCodeSpeed(speed);
         }
+        user.setActiveTime(new Date());
         userRepository.save(user);
 
         // 累计字数到所有拼字房间
@@ -279,7 +282,19 @@ public class UserService {
      * wordsToday = 0
      */
     public void updateDailyWords() {
-
+        // 获取昨天3点的日期
+        Date date = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DATE, -1);
+        calendar.set(Calendar.HOUR_OF_DAY, 3);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        date = calendar.getTime();
+        // 上次更新（昨天3点）之后活动过的账号
+        List<User> users = userRepository.findByActiveTimeGreaterThan(date);
+        System.out.println("--------------user.size" + users.size());
+        
     }
 
     /**

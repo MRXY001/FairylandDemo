@@ -1,5 +1,6 @@
 package com.iwxyi.fairyland.server.Repositories;
 
+import java.util.Date;
 import java.util.List;
 
 import com.iwxyi.fairyland.server.Models.User;
@@ -24,4 +25,6 @@ public interface UserRepository extends CrudRepository<User, Long> {
     Page<User> findAll(Pageable pageable);
 
     List<User> findAll(Specification<User> specification, Pageable pageable);
+    
+    List<User> findByActiveTimeGreaterThan(Date time);
 }

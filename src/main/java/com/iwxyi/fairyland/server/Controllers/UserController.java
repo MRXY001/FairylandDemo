@@ -260,6 +260,12 @@ public class UserController {
         List<User> users = userService.getAllUsersWithConditions(pageNumber, pageSize, user);
         return GlobalResponse.success(users);
     }
+    
+    @RequestMapping("/test")
+    public GlobalResponse<?> test() {
+        userService.updateDailyWords();
+        return GlobalResponse.success();
+    }
 
     /* -------------------------------------------------------------------------- */
     /*                                     支付                                     */

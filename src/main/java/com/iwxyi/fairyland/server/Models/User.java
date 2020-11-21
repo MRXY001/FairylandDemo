@@ -109,7 +109,7 @@ public class User {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Date loginForbidTime;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date activeTime; // 活动时间
+    private Date activeTime = new Date(0); // 活动时间
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date createTime;
