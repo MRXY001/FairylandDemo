@@ -14,6 +14,7 @@ import com.iwxyi.fairyland.server.Exception.GlobalResponse;
 import com.iwxyi.fairyland.server.Models.Coupon;
 import com.iwxyi.fairyland.server.Models.Room;
 import com.iwxyi.fairyland.server.Models.User;
+import com.iwxyi.fairyland.server.Services.DailyService;
 import com.iwxyi.fairyland.server.Services.LoginService;
 import com.iwxyi.fairyland.server.Services.MailService;
 import com.iwxyi.fairyland.server.Services.PhoneService;
@@ -54,6 +55,8 @@ public class UserController {
     private VipPaymentService vipPaymentService;
     @Autowired
     private HttpServletRequest request;
+    @Autowired
+    private DailyService dailyService;
 
     Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -263,7 +266,7 @@ public class UserController {
     
     @RequestMapping("/test")
     public GlobalResponse<?> test() {
-        userService.updateDailyWords();
+        dailyService.updateDailyWords();
         return GlobalResponse.success();
     }
 

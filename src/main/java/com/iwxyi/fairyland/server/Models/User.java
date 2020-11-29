@@ -50,12 +50,6 @@ public class User {
     @Min(0)
     @Max(2)
     private int sex; // 0女，1男
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Pattern(regexp = "^([\\u4e00-\\u9fa5]{1,20}|[a-zA-Z\\.\\s]{1,20})?$", message = "姓名格式错误")
-    private String realname; // 真实姓名
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Pattern(regexp = "(^$)|(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)", message = "身份证格式错误")
-    private String identityCard; // 实名身份证
     @Min(0)
     @Max(3)
     private int permission; // 权限：1小管理员，2大管理员，3开发级
@@ -103,25 +97,10 @@ public class User {
     @Min(0)
     private double totalPay; // 总共付了多少钱（实付）
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Min(0)
-    private int loginFailedCount; // 出错次数
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Date loginForbidTime;
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date activeTime = new Date(0); // 活动时间
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date createTime;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Date blockTime;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Date nicknameModifyTime;
-    
-    private boolean systemWindows;
-    private boolean systemAndroid;
-    private boolean systemMac;
-    private boolean systemIos;
 
     public User(String username, String passwordHash, String phoneNumber, Date createTime) {
         this.username = username;
