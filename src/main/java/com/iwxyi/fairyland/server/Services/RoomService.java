@@ -13,9 +13,11 @@ import com.iwxyi.fairyland.server.Models.RoomHistory;
 import com.iwxyi.fairyland.server.Models.RoomMember;
 import com.iwxyi.fairyland.server.Models.RoomMemberInfo;
 import com.iwxyi.fairyland.server.Models.User;
+import com.iwxyi.fairyland.server.Models.UserAddition;
 import com.iwxyi.fairyland.server.Repositories.RoomHistoryRepository;
 import com.iwxyi.fairyland.server.Repositories.RoomMemberRepository;
 import com.iwxyi.fairyland.server.Repositories.RoomRepository;
+import com.iwxyi.fairyland.server.Repositories.UserAdditionRepository;
 import com.iwxyi.fairyland.server.Repositories.UserRepository;
 
 import org.slf4j.Logger;
@@ -39,6 +41,8 @@ public class RoomService {
     RoomMemberRepository roomMemberRepository;
     @Autowired
     RoomHistoryRepository roomHistoryRepository;
+    @Autowired
+    UserAdditionRepository userAdditionRepository;
 
     Logger logger = LoggerFactory.getLogger(RoomService.class);
 
@@ -48,6 +52,11 @@ public class RoomService {
         }
         // 判断用户能否再加入房间
         canUserJoinRoom(user);
+        // 判断名字是否已存在
+        Room existRoom = roomRepository.findFirstByRoomNameAndDeletedFalse(roomName);
+        if (existRoom != null) {
+            throw new FormatedException("同名房间已存在", ErrorCode.Exist);
+        }
         // 创建房间
         String passwordHash = (password != null && !password.isEmpty()) ? (new BCryptPasswordEncoder()).encode(password)
                 : null;
@@ -55,6 +64,12 @@ public class RoomService {
         room.setOwnerName(user.getNickname());
         room.setCreateTime(new Date());
         room = roomRepository.save(room);
+
+        // 用户今日创建的房间数量+1
+        UserAddition userAddition = userAdditionRepository.findByUserId(user.getUserId());
+        userAddition.setRoomHadCount(userAddition.getRoomHadCount() + 1);
+        userAdditionRepository.save(userAddition);
+
         // 用户加入自己创建的房间
         room = joinRoom(user, room, password);
         return room;
@@ -242,14 +257,14 @@ public class RoomService {
     public void modifyUserNickname(Long userId, String nickname) {
         roomRepository.modifyOwnerNickname(userId, nickname);
     }
-    
+
     /**
      * 获取房间中的所有成员
      */
     public List<RoomMember> getRoomMembers(Long roomId) {
         return roomMemberRepository.findByRoomIdOrderByContributionDesc(roomId);
     }
-    
+
     public List<RoomMemberInfo> getRoomMemberInfos(Long roomId) {
         return roomMemberRepository.findRoomMemberInfo(roomId);
     }

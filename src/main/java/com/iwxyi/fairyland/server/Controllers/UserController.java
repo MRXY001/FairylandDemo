@@ -14,6 +14,7 @@ import com.iwxyi.fairyland.server.Exception.GlobalResponse;
 import com.iwxyi.fairyland.server.Models.Coupon;
 import com.iwxyi.fairyland.server.Models.Room;
 import com.iwxyi.fairyland.server.Models.User;
+import com.iwxyi.fairyland.server.Models.UserAddition;
 import com.iwxyi.fairyland.server.Services.DailyService;
 import com.iwxyi.fairyland.server.Services.LoginService;
 import com.iwxyi.fairyland.server.Services.MailService;
@@ -96,6 +97,7 @@ public class UserController {
             @RequestParam("password") String password, @RequestParam(value = "cpuId", required = false) String cpuId) {
         // 判断能否登录
         User user = userService.login(username, password);
+        // UserAddition userAddition = userService.getUserAddition(user);
         // 记入登录历史
         loginService.saveLogin(user.getUserId(), username, cpuId, "登录");
         // 登录成功，创建token （如果之前就带有token, 会把原来的token覆盖掉）
@@ -103,7 +105,7 @@ public class UserController {
         // 加入的拼字房间
         List<Room> rooms = roomService.getUserRooms(user.getUserId());
         // 返回登录后的一些信息
-        return GlobalResponse.map("token", token, "user", user, "rooms", rooms);
+        return GlobalResponse.map("token", token, "user", user, "rooms", rooms/* , "addition", userAddition */);
     }
 
     /**
@@ -151,7 +153,7 @@ public class UserController {
      */
     @RequestMapping("/modifyNickname")
     @LoginRequired
-    public GlobalResponse<?> modifyNickname(@LoginUser User user, String nickname) {
+    public GlobalResponse<?> modifyNickname(@LoginUser User user, @RequestParam("nickname") String nickname) {
         userService.modifyNickname(user, nickname);
         roomService.modifyUserNickname(user.getUserId(), nickname);
         return GlobalResponse.success();
@@ -263,7 +265,7 @@ public class UserController {
         List<User> users = userService.getAllUsersWithConditions(pageNumber, pageSize, user);
         return GlobalResponse.success(users);
     }
-    
+
     @RequestMapping("/test")
     public GlobalResponse<?> test() {
         dailyService.updateDailyWords();

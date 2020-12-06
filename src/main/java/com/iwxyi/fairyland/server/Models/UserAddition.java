@@ -47,8 +47,8 @@ public class UserAddition {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Date blockDeadline; // 被冻结到什么时候
     
-    private int roomMaxCreated; // 每日最多可以创建多少房间
-    private int roomHadCreated; // 今日已经创建了多少房间
+    private int roomMaxCount; // 每日最多可以创建多少房间
+    private int roomHadCount; // 今日已经创建了多少房间
 
     // 使用系统
     private boolean systemWindows;

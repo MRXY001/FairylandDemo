@@ -10,10 +10,12 @@ import com.iwxyi.fairyland.server.Models.DailyPersist;
 import com.iwxyi.fairyland.server.Models.Medal;
 import com.iwxyi.fairyland.server.Models.Room;
 import com.iwxyi.fairyland.server.Models.User;
+import com.iwxyi.fairyland.server.Models.UserAddition;
 import com.iwxyi.fairyland.server.Repositories.AwardMedalRepository;
 import com.iwxyi.fairyland.server.Repositories.DailyPersistRepository;
 import com.iwxyi.fairyland.server.Repositories.MedalRepository;
 import com.iwxyi.fairyland.server.Repositories.RoomRepository;
+import com.iwxyi.fairyland.server.Repositories.UserAdditionRepository;
 import com.iwxyi.fairyland.server.Repositories.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,8 @@ public class DailyService {
     AwardMedalRepository awardRepository;
     @Autowired
     DailyPersistRepository persistRepository;
+    @Autowired
+    UserAdditionRepository userAdditionRepository;
 	
     /**
      * 更新每天的字数
@@ -199,6 +203,11 @@ public class DailyService {
             }
             persistRepository.save(persist);
 
+            // #修改每天可创建房间数量
+            UserAddition userAddition = userAdditionRepository.findByUserId(user.getUserId());
+            userAddition.setRoomHadCount(0);
+            userAdditionRepository.save(userAddition);
+            
             // todo:计算用户的成就值
             userRepository.save(user);
         }
@@ -228,8 +237,6 @@ public class DailyService {
             }
         }
         
-        // #修改每天可创建房间数量
-
     }
 
     /**

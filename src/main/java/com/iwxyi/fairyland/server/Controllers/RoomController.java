@@ -8,6 +8,8 @@ import com.iwxyi.fairyland.server.Exception.GlobalResponse;
 import com.iwxyi.fairyland.server.Models.Room;
 import com.iwxyi.fairyland.server.Models.RoomMemberInfo;
 import com.iwxyi.fairyland.server.Models.User;
+import com.iwxyi.fairyland.server.Models.UserAddition;
+import com.iwxyi.fairyland.server.Repositories.UserAdditionRepository;
 import com.iwxyi.fairyland.server.Services.RoomService;
 import com.iwxyi.fairyland.server.Services.UserService;
 
@@ -30,8 +32,21 @@ public class RoomController {
     UserService userService;
     @Autowired
     RoomService roomService;
+    @Autowired
+    UserAdditionRepository userAdditionRepository;
 
     Logger logger = LoggerFactory.getLogger(RoomService.class);
+
+    /**
+     * 获取用户可以创建房间的数量
+     */
+    @PostMapping(value = "/createCount")
+    @LoginRequired
+    public GlobalResponse<?> createCount(@LoginUser User user) {
+        UserAddition userAddition = userAdditionRepository.findByUserId(user.getUserId());
+        System.out.println(userAddition);
+        return GlobalResponse.map("had", userAddition.getRoomHadCount(), "max", userAddition.getRoomMaxCount());
+    }
 
     /**
      * 创建一个房间
@@ -95,7 +110,7 @@ public class RoomController {
     }
 
     @PostMapping(value = "/roomMembers")
-    public GlobalResponse<?> roomMembers(Long roomId) {
+    public GlobalResponse<?> roomMembers(@RequestParam("roomId") Long roomId) {
         List<RoomMemberInfo> members = roomService.getRoomMemberInfos(roomId);
         return GlobalResponse.success(members);
     }

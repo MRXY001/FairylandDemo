@@ -199,6 +199,10 @@ public class UserService {
         throw new FormatedException(msg, ErrorCode.Incorrect);
     }
 
+    public UserAddition getUserAddition(User user) {
+        return userAdditionRepository.findByUserId(user.getUserId());
+    }
+
     /**
      * 密码加密工具类
      */

@@ -21,6 +21,7 @@ public class AwardMedal {
     private Long medalId;
     private String desc;
     private Date create_time;
+    private boolean notified;
     
     public AwardMedal(Long userId, Long medalId, String desc, Date createTime) {
         this.userId = userId;

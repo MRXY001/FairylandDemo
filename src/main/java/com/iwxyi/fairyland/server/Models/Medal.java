@@ -17,8 +17,10 @@ public class Medal {
     @Id // 主键
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 表示主键由数据库生成，自增
     private Long medalId;
-    private String name;
-    private String desc;
+    private String code; // 简写代码（唯一）
+    private String name; // 勋章名字
+    private int integral; // 勋章积分值
+    private String desc; // 勋章描述
     private Date createTime;
-    
+
 }
