@@ -67,7 +67,7 @@ public class RoomService {
 
         // 用户今日创建的房间数量+1
         UserAddition userAddition = userAdditionRepository.findByUserId(user.getUserId());
-        userAddition.setRoomHadCount(userAddition.getRoomHadCount() + 1);
+        userAddition.setRoomHadCreateCount(userAddition.getRoomHadCreateCount() + 1);
         userAdditionRepository.save(userAddition);
 
         // 用户加入自己创建的房间
@@ -209,7 +209,7 @@ public class RoomService {
 
             // 用户加入的房间数量-1
             User user = userRepository.findByUserId(member.getUserId());
-            user.setRoomJoinedCount(user.getRoomJoinedCount() - 1);
+            user.setRoomJoinedCount(user.getRoomJoinedCount() + 1);
             userRepository.save(user);
 
             // 彻底移除成员
@@ -241,7 +241,8 @@ public class RoomService {
     }
 
     private boolean canUserJoinRoom(User user) {
-        int maxCount = user.getRoomMaxCount();
+        UserAddition userAddition = userAdditionRepository.findByUserId(user.getUserId());
+        int maxCount = userAddition.getRoomMaxJoinCount();
         // 其实还有个 user.getRoomJoinedCount()，但这只是标记，不用来做判断依据
         int count = (roomMemberRepository.findByUserIdOrderByContribution(user.getUserId())).size();
         if (count >= maxCount) {

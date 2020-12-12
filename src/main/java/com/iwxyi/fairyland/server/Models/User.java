@@ -67,7 +67,7 @@ public class User {
     private String motto;
     @Pattern(regexp = "^((http|ftp|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?)?$", message = "个人主页配置出错")
     private String homePage;
-    private int roomMaxCount = 3; // 默认可以加入多少个房间
+    // private int roomMaxCount = 3; // 默认可以加入多少个房间
     private int roomJoinedCount; // 当前加入了多少个房间
 
     private int level;
@@ -87,6 +87,8 @@ public class User {
     private int allWordsYesterday;
     @Min(0)
     private int wordsYesterday;
+    @Min(0)
+    private int allTimesYesterday;
     @Min(0)
     private int codeSpeed; // 码字速度
 

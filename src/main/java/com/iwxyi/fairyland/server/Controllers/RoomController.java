@@ -45,7 +45,7 @@ public class RoomController {
     public GlobalResponse<?> createCount(@LoginUser User user) {
         UserAddition userAddition = userAdditionRepository.findByUserId(user.getUserId());
         System.out.println(userAddition);
-        return GlobalResponse.map("had", userAddition.getRoomHadCount(), "max", userAddition.getRoomMaxCount());
+        return GlobalResponse.map("had", userAddition.getRoomHadCreateCount(), "max", userAddition.getRoomMaxCreateCount());
     }
 
     /**

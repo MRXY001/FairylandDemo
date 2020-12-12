@@ -3,19 +3,11 @@ package com.iwxyi.fairyland.server.Models;
 import java.util.Date;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Transient;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import org.hibernate.validator.constraints.Length;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,8 +39,9 @@ public class UserAddition {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Date blockDeadline; // 被冻结到什么时候
     
-    private int roomMaxCount; // 每日最多可以创建多少房间
-    private int roomHadCount; // 今日已经创建了多少房间
+    private int roomMaxJoinCount;
+    private int roomMaxCreateCount; // 每日最多可以创建多少房间
+    private int roomHadCreateCount; // 今日已经创建了多少房间
 
     // 使用系统
     private boolean systemWindows;

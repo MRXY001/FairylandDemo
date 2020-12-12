@@ -14,7 +14,6 @@ import com.iwxyi.fairyland.server.Exception.GlobalResponse;
 import com.iwxyi.fairyland.server.Models.Coupon;
 import com.iwxyi.fairyland.server.Models.Room;
 import com.iwxyi.fairyland.server.Models.User;
-import com.iwxyi.fairyland.server.Models.UserAddition;
 import com.iwxyi.fairyland.server.Services.DailyService;
 import com.iwxyi.fairyland.server.Services.LoginService;
 import com.iwxyi.fairyland.server.Services.MailService;
