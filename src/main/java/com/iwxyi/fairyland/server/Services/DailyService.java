@@ -1,5 +1,6 @@
 package com.iwxyi.fairyland.server.Services;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -7,12 +8,14 @@ import java.util.List;
 import com.iwxyi.fairyland.server.Exception.FormatedException;
 import com.iwxyi.fairyland.server.Models.AwardMedal;
 import com.iwxyi.fairyland.server.Models.DailyPersist;
+import com.iwxyi.fairyland.server.Models.DailyWords;
 import com.iwxyi.fairyland.server.Models.Medal;
 import com.iwxyi.fairyland.server.Models.Room;
 import com.iwxyi.fairyland.server.Models.User;
 import com.iwxyi.fairyland.server.Models.UserAddition;
 import com.iwxyi.fairyland.server.Repositories.AwardMedalRepository;
 import com.iwxyi.fairyland.server.Repositories.DailyPersistRepository;
+import com.iwxyi.fairyland.server.Repositories.DailyWordsRepository;
 import com.iwxyi.fairyland.server.Repositories.MedalRepository;
 import com.iwxyi.fairyland.server.Repositories.RoomRepository;
 import com.iwxyi.fairyland.server.Repositories.UserAdditionRepository;
@@ -37,6 +40,8 @@ public class DailyService {
     DailyPersistRepository persistRepository;
     @Autowired
     UserAdditionRepository userAdditionRepository;
+    @Autowired
+    DailyWordsRepository dailyWordsRepository;
 	
     /**
      * 更新每天的字数
@@ -46,27 +51,34 @@ public class DailyService {
      */
     public void updateDailyWords() {
         // #获取上次更新（昨天3点）的日期
-        Date date = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(Calendar.DATE, -1);
-        calendar.set(Calendar.HOUR_OF_DAY, 3);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        date = calendar.getTime();
+        Date date = DailyWordsRepository.toDailyUpdateTime(new Date());
+        long timestamp = date.getTime(); // 必定准点的，精确到秒
+        System.out.println(date.toString());
 
         // #更新上次之后活动过的账号
         List<User> users = userRepository.findByActiveTimeGreaterThan(date);
         for (User user : users) {
             System.out.println("更新用户：" + user.getNickname());
-            // 更新每日字数等级
+            // 获取每日字数等级
             int exp = user.getAllWords() + user.getAllTimes() + user.getAllUseds() / 10 + user.getAllBonus();
             int level = Double.valueOf(Math.sqrt(exp / 100 + 1)).intValue();
+            int wordsYesterday = user.getAllWords() - user.getAllWordsYesterday();
+            int timesYesterday = user.getAllTimes() - user.getAllTimesYesterday();
+            
+            // 保存到历史记录
+            DailyWords dailyWords = new DailyWords(date, user.getUserId());
+            dailyWords.setWords(wordsYesterday);
+            dailyWords.setTimes(timesYesterday);
+            dailyWordsRepository.save(dailyWords); // 已存在的话会覆盖，所以不用担心
+            
+            // 保存到用户记录
             user.setIntegral(exp);
             user.setLevel(level);
-            int wordsYesterday = user.getAllWords() - user.getAllWordsYesterday();
+            user.setWordsToday(0);
             user.setWordsYesterday(wordsYesterday);
             user.setAllWordsYesterday(user.getAllWords());
+            user.setAllTimesYesterday(user.getAllTimes());
+            System.out.println("    字数：" + wordsYesterday + " " + user.getAllWords());
 
             // 更新连续码字持续时间
             DailyPersist persist = persistRepository.findByUserId(user.getUserId());
@@ -205,10 +217,10 @@ public class DailyService {
 
             // #修改每天可创建房间数量
             UserAddition userAddition = userAdditionRepository.findByUserId(user.getUserId());
-            userAddition.setRoomHadCount(0);
+            userAddition.setRoomHadCreateCount(0);
             userAdditionRepository.save(userAddition);
             
-            // todo:计算用户的成就值
+            // TODO:计算用户的成就值
             userRepository.save(user);
         }
 

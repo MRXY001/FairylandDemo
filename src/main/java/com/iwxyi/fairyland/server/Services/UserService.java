@@ -296,11 +296,6 @@ public class UserService {
         if (user.getRoomJoinedCount() > 0) {
             int contribution = words + times; // 只计算字数，以及少量时间
             roomMemberRepository.increaseRoomMemberContribution(user.getUserId(), contribution);
-            /* List<RoomMember> roomMembers = roomMemberRepository.findByUserId(user.getUserId());
-            for (RoomMember roomMember : roomMembers) {
-                roomMember.setIntegral(roomMember.getIntegral() + contribution);
-                roomMemberRepository.save(roomMember);
-            } */
         }
 
         return user;
