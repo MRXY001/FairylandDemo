@@ -267,7 +267,7 @@ public class UserController {
 
     @RequestMapping("/test")
     public GlobalResponse<?> test() {
-        dailyService.updateDailyWords();
+        dailyService.updateHourlyWords();
         return GlobalResponse.success();
     }
 
@@ -313,5 +313,15 @@ public class UserController {
         user = vipPaymentService.savePayment(user, paymentAmount, originalAmount, couponCode, days, paymentTime,
                 new Timestamp(System.currentTimeMillis()));
         return GlobalResponse.map("vipDeadline", user.getVipDeadline());
+    }
+    
+    /* -------------------------------------------------------------------------- */
+    /*                                     其他                                    */
+    /* -------------------------------------------------------------------------- */
+    @RequestMapping("/encodeUserPassword") // !这个API需要改得复杂一点，免得被攻击
+    @ResponseBody
+    public GlobalResponse<?> encodeUserPassword() {
+        userService.encodeUserPassword();
+        return GlobalResponse.success();
     }
 }

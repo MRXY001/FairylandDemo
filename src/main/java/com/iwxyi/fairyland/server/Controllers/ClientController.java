@@ -5,7 +5,9 @@ import java.util.List;
 
 import com.iwxyi.fairyland.server.Exception.GlobalResponse;
 import com.iwxyi.fairyland.server.Models.ClientStartup;
+import com.iwxyi.fairyland.server.Models.ClientUpdate;
 import com.iwxyi.fairyland.server.Services.ClientStartupService;
+import com.iwxyi.fairyland.server.Services.ClientUpdateService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -24,12 +26,17 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 @RestController
-@RequestMapping(value = "/server/usage", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/server/client", produces = "application/json;charset=UTF-8")
 @CrossOrigin(allowCredentials = "true", allowedHeaders = "*")
-public class UsageController {
+public class ClientController {
     @Autowired
     ClientStartupService clientStartupService;
+    @Autowired
+    ClientUpdateService clientUpdateService;
 
+    /**
+     * 启动时发送本次启动以及之前的启动关闭
+     */
     @PostMapping(value = "/startup")
     @ResponseBody
     public GlobalResponse<?> recordStartup(@RequestParam(value = "cpuId", required = false) String cpuId,
@@ -40,6 +47,9 @@ public class UsageController {
         return GlobalResponse.map("startupId", clientStartup.getStartupId());
     }
 
+    /**
+     * 带有多条启动关闭的数据
+     */
     @PostMapping(value = "/startupAndClose")
     @ResponseBody
     public GlobalResponse<?> recordStartupAndClose(@RequestBody List<ClientStartup> clientStartups) {
@@ -47,5 +57,14 @@ public class UsageController {
         // (最后一项（如果有）必定是带有上次startupId的关闭时间)
         clientStartupService.saveStartupAndClose(clientStartups);
         return GlobalResponse.success();
+    }
+
+    @RequestMapping(value = "/updatedVersions")
+    @ResponseBody
+    public GlobalResponse<?> updatedVersions(@RequestParam(value = "app", required = false) String app,
+            @RequestParam(value = "platform", required = false) String platform,
+            @RequestParam(value = "version", required = false) Integer version) {
+        List<ClientUpdate> clientUpdates = clientUpdateService.getUpdatedVersions(app, platform, version);
+        return GlobalResponse.success(clientUpdates);
     }
 }

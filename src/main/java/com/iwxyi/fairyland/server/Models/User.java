@@ -27,10 +27,9 @@ public class User {
     @Id // 主键
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 表示主键由数据库生成，自增
     private Long userId;
-    @NotBlank(message = "用户名不能为空")
-    @Length(min = 2, max = 16, message = "用户名长度必须在{min}~{max}之间")
-    // @Pattern(regexp = "^\\w[\\w\\d_]{1,15}$", message = "用户名只允许2~16位的大小写字母/数字/下划线，且要求字母开头")
-    @Pattern(regexp = "^[\\u4e00-\\u9fa5\\w\\d_]{2,16}$", message = "用户名只允许2~16位的汉字/大小写字母/数字/下划线")
+    @NotBlank(message = "账号不能为空")
+    @Length(min = 2, max = 255, message = "用户名长度必须在{min}~{max}之间")
+    @Pattern(regexp = "^[\\u4e00-\\u9fa5\\w\\d_]{2,16}$", message = "账号只允许2~255位的汉字/大小写字母/数字/下划线")
     private String username;
     @NotBlank(message = "密码不能为空")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // 从JSON中读取，但不保存到JSON
@@ -39,7 +38,6 @@ public class User {
     @Pattern(regexp = "^[\\u4e00-\\u9fa5\\w\\d_]{2,16}$", message = "昵称只允许2~16位的汉字/大小写字母/数字/下划线")
     @Length(min = 2, max = 16, message = "昵称长度必须在{min}~{max}之间")
     private String nickname;
-    @NotBlank(message = "手机号码不能为空")
     @Length(min = 11, max = 11, message = "请输入正确的手机号")
     @Pattern(regexp = "^(((13[0-9])|(14[579])|(15([0-3]|[5-9]))|(16[6])|(17[0135678])|(18[0-9])|(19[89]))\\d{8})$", message = "请输入正确的手机号")
     private String phoneNumber;
@@ -79,7 +77,6 @@ public class User {
     private int allUseds;
     @Min(0)
     private int allTimes;
-    @Min(0)
     private int allBonus;
     @Min(0)
     private int wordsToday;

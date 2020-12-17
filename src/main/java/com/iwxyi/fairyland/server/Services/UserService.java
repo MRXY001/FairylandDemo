@@ -329,4 +329,19 @@ public class UserService {
         }, pageable);
         return users;
     }
+    
+    /**
+     * 将导入的账号计算密码
+     */
+    public void encodeUserPassword() {
+        Iterable<User> users = userRepository.findAll();
+        for (User user : users) {
+            if (user.getPasswordHash().startsWith("$"))
+                continue;
+            
+            String passwordHash = bcryptPasswordEncoder().encode(user.getPasswordHash());
+            user.setPasswordHash(passwordHash);
+            userRepository.save(user);
+        }
+    }
 }

@@ -45,9 +45,10 @@ public class DailyService {
 	
     /**
      * 更新每天的字数
+     * wordsToday = 0
      * wordsYesterday = allWords - allWordsYesterday
      * allWordsYesterday = allWords
-     * wordsToday = 0
+     * timesYesterday = allTimes
      */
     public void updateDailyWords() {
         // #获取上次更新（昨天3点）的日期
@@ -78,7 +79,7 @@ public class DailyService {
             user.setWordsYesterday(wordsYesterday);
             user.setAllWordsYesterday(user.getAllWords());
             user.setAllTimesYesterday(user.getAllTimes());
-            System.out.println("    字数：" + wordsYesterday + " " + user.getAllWords());
+            System.out.println("    字数：day=" + wordsYesterday + ", all=" + user.getAllWords());
 
             // 更新连续码字持续时间
             DailyPersist persist = persistRepository.findByUserId(user.getUserId());
