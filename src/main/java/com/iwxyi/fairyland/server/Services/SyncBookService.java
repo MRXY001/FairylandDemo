@@ -37,10 +37,10 @@ public class SyncBookService {
 
     public SyncBook getBook(Long userId, Long bookIndex) {
         SyncBook book = bookRepository.findByBookIndex(bookIndex);
-        if (book != null && book.getUserId() != userId) {
+        if (book != null && !book.getUserId().equals(userId)) {
             // ?这本书不是这个用户的？可能是用户好奇手动改的ID
             // (也可能是黑客轰炸，尝试挨个拉取作品)
-            throw new FormatedException("未找到该用户的作品", ErrorCode.NotExist);
+            throw new FormatedException("未找到用户的作品:" + book.getBookIndex(), ErrorCode.NotExist);
         }
         return book;
     }

@@ -12,14 +12,9 @@ import org.springframework.stereotype.Service;
 public class ClientUpdateService {
     @Autowired
     ClientUpdateRepository clientUpdateRepository;
-
-    public ClientUpdate getLastestVersion(String app, String platform) {
-        ClientUpdate clientUpdate = clientUpdateRepository.findFirstByAppAndPlatformOrderByVersionDesc(app, platform);
-        return clientUpdate;
-    }
     
-    public List<ClientUpdate> getUpdatedVersions(String app, String platform, Integer version) {
-        List<ClientUpdate> clientUpdates = clientUpdateRepository.findByAppAndPlatformAndVersionGreaterThanOrderByVersionDesc(app, platform, version);
+    public List<ClientUpdate> getUpdatedVersions(String app, String platform, String period, String channel, Integer version) {
+        List<ClientUpdate> clientUpdates = clientUpdateRepository.findByAppAndPlatformAndPeriodAndChannelAndVersionGreaterThanOrderByVersionDesc(app, platform, period, channel, version);
         return clientUpdates;
     }
 }

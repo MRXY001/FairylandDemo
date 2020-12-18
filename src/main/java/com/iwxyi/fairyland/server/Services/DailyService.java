@@ -1,6 +1,5 @@
 package com.iwxyi.fairyland.server.Services;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -52,8 +51,7 @@ public class DailyService {
      */
     public void updateDailyWords() {
         // #获取上次更新（昨天3点）的日期
-        Date date = DailyWordsRepository.toDailyUpdateTime(new Date());
-        long timestamp = date.getTime(); // 必定准点的，精确到秒
+        Date date = DailyWordsRepository.toDailyUpdateTime(new Date()); // 必定准点的，精确到毫秒
         System.out.println(date.toString());
 
         // #更新上次之后活动过的账号

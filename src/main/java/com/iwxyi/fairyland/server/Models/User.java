@@ -107,6 +107,7 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.nickname = username;
         this.createTime = createTime;
+        this.activeTime = createTime;
     }
 
     // 方便调试时查看数据

@@ -1,18 +1,14 @@
 package com.iwxyi.fairyland.server.Controllers;
 
-import java.util.Date;
 import java.util.List;
 
 import com.iwxyi.fairyland.server.Exception.GlobalResponse;
-import com.iwxyi.fairyland.server.Models.ClientStartup;
 import com.iwxyi.fairyland.server.Models.ClientUpdate;
 import com.iwxyi.fairyland.server.Services.ClientStartupService;
 import com.iwxyi.fairyland.server.Services.ClientUpdateService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -35,36 +31,37 @@ public class ClientController {
     ClientUpdateService clientUpdateService;
 
     /**
-     * 启动时发送本次启动以及之前的启动关闭
+     * 检测程序更新的版本
      */
-    @PostMapping(value = "/startup")
+    @RequestMapping(value = "/updatedVersions")
     @ResponseBody
-    public GlobalResponse<?> recordStartup(@RequestParam(value = "cpuId", required = false) String cpuId,
-            @RequestParam(value = "userId", required = false) Long userId,
-            @RequestParam(value = "startupTime") Long startupTime) {
-        // #保存当前次的启动时间
-        ClientStartup clientStartup = clientStartupService.saveStartup(cpuId, userId, new Date(startupTime));
-        return GlobalResponse.map("startupId", clientStartup.getStartupId());
+    private GlobalResponse<?> updatedVersions(@RequestParam(value = "app", required = false) String app,
+            @RequestParam(value = "platform", required = false) String platform,
+            @RequestParam(value = "period", required = false) String period,
+            @RequestParam(value = "channel", required = false) String channel,
+            @RequestParam(value = "version", required = false) Integer version) {
+        // #获取更新的版本
+        List<ClientUpdate> clientUpdates = clientUpdateService.getUpdatedVersions(app, platform, period, channel,
+                version);
+        return GlobalResponse.success(clientUpdates);
     }
 
     /**
-     * 带有多条启动关闭的数据
+     * 所有启动都在上面
      */
-    @PostMapping(value = "/startupAndClose")
+    @RequestMapping(value = "/appStartup")
     @ResponseBody
-    public GlobalResponse<?> recordStartupAndClose(@RequestBody List<ClientStartup> clientStartups) {
-        // #保存之前上传的启动时间对应的关闭时间
-        // (最后一项（如果有）必定是带有上次startupId的关闭时间)
-        clientStartupService.saveStartupAndClose(clientStartups);
-        return GlobalResponse.success();
-    }
-
-    @RequestMapping(value = "/updatedVersions")
-    @ResponseBody
-    public GlobalResponse<?> updatedVersions(@RequestParam(value = "app", required = false) String app,
-            @RequestParam(value = "platform", required = false) String platform,
-            @RequestParam(value = "version", required = false) Integer version) {
-        List<ClientUpdate> clientUpdates = clientUpdateService.getUpdatedVersions(app, platform, version);
-        return GlobalResponse.success(clientUpdates);
+    public GlobalResponse<?> appStartup(@RequestParam(value = "app") String app,
+            @RequestParam(value = "platform") String platform, @RequestParam(value = "period") String period,
+            @RequestParam(value = "channel") String channel, @RequestParam(value = "version") Integer version,
+            @RequestParam(value = "cpuId", required = false) String cpuId,
+            @RequestParam(value = "userId", required = false) Long userId,
+            @RequestParam(value = "pairs", required = false) String pairsStr) {
+        // #保存当前次的启动时间
+        clientStartupService.saveValues(cpuId, userId, app, platform, period, channel, version, pairsStr);
+        // #获取更新的版本
+        List<ClientUpdate> clientUpdates = clientUpdateService.getUpdatedVersions(app, platform, period, channel,
+                version);
+        return GlobalResponse.map("updated", clientUpdates);
     }
 }

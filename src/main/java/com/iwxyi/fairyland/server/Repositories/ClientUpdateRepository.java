@@ -8,9 +8,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ClientUpdateRepository extends CrudRepository<ClientUpdate, Long> {
 
-    ClientUpdate findByAppAndPlatformAndVersion(String app, String platform, Long version);
-
-    ClientUpdate findFirstByAppAndPlatformOrderByVersionDesc(String app, String platform);
-
-    List<ClientUpdate> findByAppAndPlatformAndVersionGreaterThanOrderByVersionDesc(String app, String platform, int version);
+    List<ClientUpdate> findByAppAndPlatformAndPeriodAndChannelAndVersionGreaterThanOrderByVersionDesc(String app, String platform, String period, String channel, int version);
 }
