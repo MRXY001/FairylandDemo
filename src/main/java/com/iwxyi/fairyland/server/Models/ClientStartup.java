@@ -26,16 +26,6 @@ public class ClientStartup {
     private Integer wordCount; // 这一段期间的字数统计
 
     /**
-     * 每次登录都是带着上次关闭时间+本次启动时间
-     * 所以closeTime一定会有个空的
-     */
-    public ClientStartup(String cpuId, Long userId, Date startupTime) {
-        this.cpuId = cpuId;
-        this.userId = userId;
-        this.startupTime = startupTime;
-    }
-    
-    /**
      * 可能会有多次打开，而只上传一次
      * 这是会有m个 startup-close 数组对，以及单个 startup
      * 最终添加 m + 1 条记录
